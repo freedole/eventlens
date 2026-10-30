@@ -119,3 +119,28 @@ public sealed class ZeroToVisibleConverter : IValueConverter
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => DependencyProperty.UnsetValue;
 }
+
+/// <summary>RestartKind -> brush (planned = blue, update = green, unexpected = orange, BSOD = red).</summary>
+public sealed class RestartKindToBrushConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var c = value switch
+        {
+            EventLens.Services.RestartKind.Planned => Palette.Neutral,
+            EventLens.Services.RestartKind.WindowsUpdate => Palette.Good,
+            EventLens.Services.RestartKind.Unexpected => Palette.Warn,
+            EventLens.Services.RestartKind.BlueScreen => Palette.Bad,
+            _ => Color.FromRgb(0x8A, 0x8A, 0x8A),
+        };
+        return Palette.Brush(c, parameter as string == "soft" ? (byte)0x2E : (byte)0xFF);
+    }
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => DependencyProperty.UnsetValue;
+}
+
+public sealed class InvertBoolConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value is not true;
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => value is not true;
+}

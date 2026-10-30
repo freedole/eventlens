@@ -1,0 +1,144 @@
+<Page x:Class="EventLens.Views.RestartsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:conv="clr-namespace:EventLens.Converters"
+      x:Name="Root"
+      Title="Restarts">
+    <Page.Resources>
+        <conv:SymbolConverter x:Key="Sym" />
+        <conv:RestartKindToBrushConverter x:Key="KindBrush" />
+        <conv:NullToVisibilityConverter x:Key="NullToVis" />
+        <FontFamily x:Key="Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+        <Style x:Key="Surface" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="20" />
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,12,32,32" MaxWidth="1200">
+            <Grid Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="Why did it restart?" FontFamily="{StaticResource Display}" FontSize="28" FontWeight="SemiBold" />
+                    <TextBlock Text="Every restart in the last 120 days, classified from shutdown and boot events."
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,4,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <ui:ProgressRing IsIndeterminate="True" Width="16" Height="16" Margin="0,0,10,0"
+                                     Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
+                    <ui:Button Content="Refresh" Appearance="Primary" Command="{Binding RefreshCommand}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="ArrowClockwise24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- latest restart, big -->
+            <Border Style="{StaticResource Surface}" Padding="24" Margin="0,0,0,20"
+                    Visibility="{Binding Latest, Converter={StaticResource NullToVis}}">
+                <Grid DataContext="{Binding Latest}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="64" Height="64" CornerRadius="32" VerticalAlignment="Top"
+                            Background="{Binding Kind, Converter={StaticResource KindBrush}, ConverterParameter=soft}">
+                        <ui:SymbolIcon Symbol="{Binding Icon, Converter={StaticResource Sym}}" FontSize="30"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="{Binding Kind, Converter={StaticResource KindBrush}}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="20,0,16,0">
+                        <TextBlock FontSize="13" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                            <Run Text="LAST RESTART · " /><Run Text="{Binding BootTime, Mode=OneWay, StringFormat=f}" />
+                        </TextBlock>
+                        <TextBlock Text="{Binding Title}" FontFamily="{StaticResource Display}" FontSize="26" FontWeight="SemiBold"
+                                   Margin="0,2,0,6" TextWrapping="Wrap" Foreground="{Binding Kind, Converter={StaticResource KindBrush}}" />
+                        <TextBlock Text="{Binding Detail}" TextWrapping="Wrap" FontSize="14" />
+                        <TextBlock Margin="0,8,0,0" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}">
+                            <Run Text="Uptime before restart: " /><Run Text="{Binding UptimeText, Mode=OneWay}" />
+                        </TextBlock>
+                    </StackPanel>
+                    <StackPanel Grid.Column="2" MinWidth="170">
+                        <ui:Button Content="Ask AI" Appearance="Primary" HorizontalAlignment="Stretch" Margin="0,0,0,6"
+                                   Command="{Binding DataContext.AskAiCommand, ElementName=Root}" CommandParameter="{Binding}">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="Sparkle24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:Button Content="Events around it" HorizontalAlignment="Stretch"
+                                   Command="{Binding DataContext.OpenEventsCommand, ElementName=Root}" CommandParameter="{Binding}">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="List24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock Text="History" FontFamily="{StaticResource Display}" FontSize="20" FontWeight="SemiBold" Margin="0,4,0,12" />
+
+            <ItemsControl ItemsSource="{Binding Items}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Style="{StaticResource Surface}" Padding="16,12" Margin="0,0,0,8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="150" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="110" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Width="36" Height="36" CornerRadius="18" VerticalAlignment="Center"
+                                        Background="{Binding Kind, Converter={StaticResource KindBrush}, ConverterParameter=soft}">
+                                    <ui:SymbolIcon Symbol="{Binding Icon, Converter={StaticResource Sym}}" FontSize="17"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                   Foreground="{Binding Kind, Converter={StaticResource KindBrush}}" />
+                                </Border>
+                                <StackPanel Grid.Column="1" Margin="14,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding BootTime, StringFormat='ddd d MMM'}" FontWeight="SemiBold" />
+                                    <TextBlock Text="{Binding BootTime, StringFormat='HH:mm'}" FontSize="12"
+                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="0,0,12,0">
+                                    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Detail}" FontSize="12" TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding KindText}" FontSize="12" FontWeight="SemiBold"
+                                               Foreground="{Binding Kind, Converter={StaticResource KindBrush}}" />
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}">
+                                        <Run Text="up " /><Run Text="{Binding UptimeText, Mode=OneWay}" />
+                                    </TextBlock>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
+                                    <ui:Button Appearance="Transparent" ToolTip="Ask AI" Margin="0,0,4,0"
+                                               Command="{Binding DataContext.AskAiCommand, ElementName=Root}" CommandParameter="{Binding}">
+                                        <ui:Button.Icon>
+                                            <ui:SymbolIcon Symbol="Sparkle24" />
+                                        </ui:Button.Icon>
+                                    </ui:Button>
+                                    <ui:Button Appearance="Transparent" ToolTip="Events around this restart"
+                                               Command="{Binding DataContext.OpenEventsCommand, ElementName=Root}" CommandParameter="{Binding}">
+                                        <ui:Button.Icon>
+                                            <ui:SymbolIcon Symbol="ChevronRight24" />
+                                        </ui:Button.Icon>
+                                    </ui:Button>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <TextBlock Text="{Binding Status}" Margin="0,10,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+    </ScrollViewer>
+</Page>

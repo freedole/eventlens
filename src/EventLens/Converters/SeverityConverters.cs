@@ -6,26 +6,25 @@ using EventLens.Models;
 
 namespace EventLens.Converters;
 
+/// <summary>Severity -> brush. ConverterParameter "soft" returns a translucent tint (for pills/backgrounds).</summary>
 public sealed class SeverityToBrushConverter : IValueConverter
 {
-    private static readonly Brush Critical = Freeze(new SolidColorBrush(Color.FromRgb(0xC4, 0x2B, 0x1C)));
-    private static readonly Brush Error = Freeze(new SolidColorBrush(Color.FromRgb(0xE8, 0x11, 0x23)));
-    private static readonly Brush Warning = Freeze(new SolidColorBrush(Color.FromRgb(0xF7, 0xA4, 0x00)));
-    private static readonly Brush Info = Freeze(new SolidColorBrush(Color.FromRgb(0x00, 0x78, 0xD4)));
-    private static readonly Brush Verbose = Freeze(new SolidColorBrush(Color.FromRgb(0x8A, 0x8A, 0x8A)));
-
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture) => value switch
+    private static Color ColorFor(Severity s) => s switch
     {
-        Severity.Critical => Critical,
-        Severity.Error => Error,
-        Severity.Warning => Warning,
-        Severity.Verbose => Verbose,
-        _ => Info,
+        Severity.Critical => Color.FromRgb(0xD1, 0x34, 0x38),
+        Severity.Error => Color.FromRgb(0xFF, 0x5A, 0x5F),
+        Severity.Warning => Color.FromRgb(0xF7, 0xA4, 0x00),
+        Severity.Verbose => Color.FromRgb(0x8A, 0x8A, 0x8A),
+        _ => Color.FromRgb(0x4C, 0xA8, 0xF5),
     };
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => DependencyProperty.UnsetValue;
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    {
+        var sev = value is Severity s ? s : Severity.Information;
+        return Palette.Brush(ColorFor(sev), parameter as string == "soft" ? (byte)0x33 : (byte)0xFF);
+    }
 
-    private static Brush Freeze(Brush b) { b.Freeze(); return b; }
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => DependencyProperty.UnsetValue;
 }
 
 public sealed class NullToVisibilityConverter : IValueConverter

@@ -1,8 +1,11 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using EventLens.Models;
 using EventLens.Services;
+using Microsoft.Win32;
 
 namespace EventLens.ViewModels;
 
@@ -17,6 +20,8 @@ public sealed class StatCard : ObservableObject
 
     public required string Title { get; init; }
     public required string Icon { get; init; }
+    /// <summary>Filter opened on the Events page when the card is clicked.</summary>
+    public required EventQuerySpec Spec { get; init; }
     public string Value { get => _value; set => SetProperty(ref _value, value); }
     public string Hint { get => _hint; set => SetProperty(ref _hint, value); }
     public CardState State { get => _state; set => SetProperty(ref _state, value); }
@@ -28,29 +33,62 @@ public sealed class HeatDay
     public required DateTime Date { get; init; }
     public required int Count { get; init; }
     public required int Level { get; init; }
-    public string Tip => $"{Date:ddd, d MMM}: {Count:N0} errors";
+    public string Tip => $"{Date:ddd, d MMM}: {Count:N0} errors - click to open";
     public string DayLabel => Date.Day.ToString();
 }
 
 public sealed class DashboardViewModel : ObservableObject
 {
     private const int Days = 30;
+    private static readonly TimeSpan Month = TimeSpan.FromDays(Days);
+    private static readonly TimeSpan Day = TimeSpan.FromHours(24);
+    private static readonly string[] SysApp = ["System", "Application"];
 
     private bool _isLoading;
+    private bool _loadedOnce;
     private string _status = "";
     private int _score;
     private string _verdict = "Analyzing…";
     private string _verdictDetail = "Reading event logs";
     private string _uptime = "";
     private string _lastBoot = "";
+    private string _machineName = Environment.MachineName;
 
-    public StatCard UnexpectedShutdowns { get; } = new() { Title = "Unexpected shutdowns", Icon = "Power24" };
-    public StatCard BlueScreens { get; } = new() { Title = "Blue screens", Icon = "ErrorCircle24" };
-    public StatCard AppCrashes { get; } = new() { Title = "App crashes", Icon = "Apps24" };
-    public StatCard DiskErrors { get; } = new() { Title = "Disk errors", Icon = "Storage24" };
-    public StatCard Errors { get; } = new() { Title = "Errors today", Icon = "DismissCircle24" };
-    public StatCard Warnings { get; } = new() { Title = "Warnings today", Icon = "Warning24" };
-    public StatCard FailedLogons { get; } = new() { Title = "Failed logons today", Icon = "LockClosed24" };
+    public StatCard UnexpectedShutdowns { get; } = new()
+    {
+        Title = "Unexpected shutdowns", Icon = "Power24",
+        Spec = new() { Logs = ["System"], Ids = [41, 6008], Window = Month, Label = "Unexpected shutdowns · 30 days", Group = false },
+    };
+    public StatCard BlueScreens { get; } = new()
+    {
+        Title = "Blue screens", Icon = "ErrorCircle24",
+        Spec = new() { Logs = ["System"], Ids = [1001], Providers = ["Microsoft-Windows-WER-SystemErrorReporting"], Window = Month, Label = "Blue screens · 30 days", Group = false },
+    };
+    public StatCard AppCrashes { get; } = new()
+    {
+        Title = "App crashes", Icon = "Apps24",
+        Spec = new() { Logs = ["Application"], Ids = [1000, 1002, 1026], Window = Month, Label = "App crashes · 30 days" },
+    };
+    public StatCard DiskErrors { get; } = new()
+    {
+        Title = "Disk errors", Icon = "Storage24",
+        Spec = new() { Logs = ["System"], Ids = [7, 51, 153, 129, 55], Window = Month, Label = "Disk errors · 30 days" },
+    };
+    public StatCard Errors { get; } = new()
+    {
+        Title = "Errors today", Icon = "DismissCircle24",
+        Spec = new() { Logs = SysApp, MaxLevel = Severity.Error, Window = Day, Label = "Errors · last 24 hours" },
+    };
+    public StatCard Warnings { get; } = new()
+    {
+        Title = "Warnings today", Icon = "Warning24",
+        Spec = new() { Logs = SysApp, MaxLevel = Severity.Warning, Window = Day, Label = "Errors + warnings · last 24 hours" },
+    };
+    public StatCard FailedLogons { get; } = new()
+    {
+        Title = "Failed logons today", Icon = "LockClosed24",
+        Spec = new() { Logs = ["Security"], Ids = [4625], Window = Day, Label = "Failed logons · last 24 hours" },
+    };
 
     public ObservableCollection<StatCard> Cards { get; } = [];
     public ObservableCollection<HeatDay> Heat { get; } = [];
@@ -63,81 +101,154 @@ public sealed class DashboardViewModel : ObservableObject
     public string VerdictDetail { get => _verdictDetail; set => SetProperty(ref _verdictDetail, value); }
     public string Uptime { get => _uptime; set => SetProperty(ref _uptime, value); }
     public string LastBoot { get => _lastBoot; set => SetProperty(ref _lastBoot, value); }
-    public string MachineName { get; } = Environment.MachineName;
+    public string MachineName { get => _machineName; set => SetProperty(ref _machineName, value); }
 
     public IAsyncRelayCommand RefreshCommand { get; }
+    public IRelayCommand<StatCard> OpenCardCommand { get; }
+    public IRelayCommand<HeatDay> OpenDayCommand { get; }
+    public IRelayCommand<EventItem> OpenEventCommand { get; }
+    public IRelayCommand OpenMonthCommand { get; }
+    public IRelayCommand OpenTodayCommand { get; }
+    public IRelayCommand OpenIssuesCommand { get; }
+    public IAsyncRelayCommand ExportCommand { get; }
+    public IRelayCommand WhyRestartCommand { get; }
 
     public DashboardViewModel()
     {
         foreach (var c in new[] { UnexpectedShutdowns, BlueScreens, AppCrashes, DiskErrors, Errors, Warnings, FailedLogons })
             Cards.Add(c);
+
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
+        OpenCardCommand = new RelayCommand<StatCard>(c => { if (c is not null) Navigator.OpenEvents(c.Spec); });
+        OpenDayCommand = new RelayCommand<HeatDay>(OpenDay);
+        OpenEventCommand = new RelayCommand<EventItem>(OpenEvent);
+        OpenMonthCommand = new RelayCommand(() => Navigator.OpenEvents(new EventQuerySpec
+            { Logs = SysApp, MaxLevel = Severity.Error, Window = Month, Label = "Errors · last 30 days" }));
+        OpenTodayCommand = new RelayCommand(() => OpenDay(Heat.LastOrDefault()));
+        OpenIssuesCommand = new RelayCommand(() => Navigator.OpenEvents(new EventQuerySpec
+        {
+            Logs = SysApp, Ids = [41, 6008, 1001, 1000, 1002, 1026, 7, 51, 153, 129, 55], Window = Month,
+            Label = "Problems behind the health score · 30 days",
+        }));
+        ExportCommand = new AsyncRelayCommand(ExportAsync);
+        WhyRestartCommand = new RelayCommand(() => Navigator.Navigate(typeof(Views.RestartsPage)));
+
+        AppState.SourceChanged += (_, _) =>
+        {
+            MachineName = AppState.Source.ShortName;
+            if (_loadedOnce) _ = RefreshAsync();
+        };
     }
+
+    public void EnsureLoaded()
+    {
+        if (_loadedOnce) return;
+        _ = RefreshAsync();
+    }
+
+    private void OpenDay(HeatDay? d)
+    {
+        if (d is null) return;
+        Navigator.OpenEvents(new EventQuerySpec
+        {
+            Logs = SysApp, MaxLevel = Severity.Error, From = d.Date, To = d.Date.AddDays(1),
+            Label = $"Errors on {d.Date:ddd, d MMM}",
+        });
+    }
+
+    private void OpenEvent(EventItem? e)
+    {
+        if (e is null) return;
+        Navigator.OpenEvents(new EventQuerySpec
+        {
+            Logs = [e.LogName], Ids = [e.Id], Providers = [e.Provider], Window = Month,
+            SelectRecordId = e.RecordId, Group = false,
+            Label = $"{e.Summary} · 30 days",
+        });
+    }
+
+    // ---------- loading ----------
 
     public async Task RefreshAsync()
     {
         if (IsLoading) return;
+        _loadedOnce = true;
         IsLoading = true;
         Status = "Reading event logs…";
+        var sw = Stopwatch.StartNew();
         try
         {
-            var up = TimeSpan.FromMilliseconds(Environment.TickCount64);
-            Uptime = up.TotalDays >= 1 ? $"{(int)up.TotalDays} d {up.Hours} h" : $"{up.Hours} h {up.Minutes} min";
-            LastBoot = (DateTime.Now - up).ToString("g");
+            MachineName = AppState.Source.ShortName;
+            if (AppState.Source.Kind == SourceKind.Local)
+            {
+                var up = TimeSpan.FromMilliseconds(Environment.TickCount64);
+                Uptime = FormatSpan(up);
+                LastBoot = (DateTime.Now - up).ToString("g");
+            }
+            else
+            {
+                Uptime = "-";
+                LastBoot = "-";
+            }
 
-            var window = TimeSpan.FromDays(Days);
+            foreach (var c in Cards) { c.Value = "…"; c.Hint = ""; c.Spark = null; c.State = CardState.Neutral; }
+            Verdict = "Analyzing…";
+            VerdictDetail = "Reading event logs";
+
             const int cap = 20000;
 
-            var tSysErr = SafeQuery("System", EventLogService.BuildXPath(Severity.Error, window), cap);
-            var tAppErr = SafeQuery("Application", EventLogService.BuildXPath(Severity.Error, window), cap);
-            var tSysWarn = SafeQuery("System", LevelXPath(3, window), cap);
-            var tAppWarn = SafeQuery("Application", LevelXPath(3, window), cap);
-            var tDisk = SafeQuery("System", EventLogService.BuildXPath(null, window, [7, 51, 153, 129, 55]), cap);
-            var tLogon = SafeQuery("Security", EventLogService.BuildXPath(null, window, [4625]), cap);
+            // each card fills in as soon as its own query is done (progressive UI)
+            var tErr = SafeQuery(SysApp, EventLogService.BuildXPath(Severity.Error, Month), cap);
+            var tDisk = SafeQuery(["System"], EventLogService.BuildXPath(null, Month, [7, 51, 153, 129, 55]), cap);
+            var tWarn = SafeQuery(SysApp, LevelXPath(3, Month), cap);
+            var tLogon = SafeQuery(["Security"], EventLogService.BuildXPath(null, Month, [4625]), cap);
+            var tTimeline = LoadTimelineAsync();
 
-            await Task.WhenAll(tSysErr, tAppErr, tSysWarn, tAppWarn, tDisk, tLogon);
-
-            var sysErr = tSysErr.Result ?? new List<EventItem>();
-            var appErr = tAppErr.Result ?? new List<EventItem>();
-            var warn = (tSysWarn.Result ?? new List<EventItem>()).Concat(tAppWarn.Result ?? new List<EventItem>()).ToList();
-            var disk = (tDisk.Result ?? new List<EventItem>()).Where(e => IsDiskProvider(e.Provider)).ToList();
-
-            var shutdowns = sysErr.Where(e => e.Id is 41 or 6008).ToList();
-            var bsod = sysErr.Where(e => e.Id == 1001 && e.Provider == "Microsoft-Windows-WER-SystemErrorReporting").ToList();
-            var crashes = appErr.Where(e => e.Id is 1000 or 1002 or 1026).ToList();
-            var errors = sysErr.Concat(appErr).ToList();
-
+            var errors = await tErr ?? new List<EventItem>();
+            var shutdowns = errors.Where(e => e.Id is 41 or 6008).ToList();
+            var bsod = errors.Where(e => e.Id == 1001 && e.Provider == "Microsoft-Windows-WER-SystemErrorReporting").ToList();
+            var crashes = errors.Where(e => e.Id is 1000 or 1002 or 1026).ToList();
             SetCard(UnexpectedShutdowns, shutdowns, true, "last 30 days", warnAt: 1, badAt: 2);
             SetCard(BlueScreens, bsod, true, "last 30 days", warnAt: 1, badAt: 1);
             SetCard(AppCrashes, crashes, true, "last 30 days", warnAt: 3, badAt: 10);
-            SetCard(DiskErrors, disk, true, "last 30 days", warnAt: 1, badAt: 3);
             SetCard(Errors, errors, false, "System + Application", warnAt: 10, badAt: 50);
+            BuildHeatmap(errors);
+
+            var disk = (await tDisk ?? new List<EventItem>()).Where(e => IsDiskProvider(e.Provider)).ToList();
+            SetCard(DiskErrors, disk, true, "last 30 days", warnAt: 1, badAt: 3);
+
+            ComputeScore(shutdowns.Count, bsod.Count, crashes.Count, disk.Count, CountToday(errors));
+
+            var warn = await tWarn ?? new List<EventItem>();
             SetCard(Warnings, warn, false, "System + Application", warnAt: 50, badAt: 200, neutral: true);
 
-            if (tLogon.Result is null)
+            var logons = await tLogon;
+            if (logons is null)
             {
                 FailedLogons.Value = "-";
-                FailedLogons.Hint = "Run as administrator";
+                FailedLogons.Hint = AppState.Source.Kind == SourceKind.Local ? "Run as administrator" : "No access to Security log";
                 FailedLogons.State = CardState.Neutral;
                 FailedLogons.Spark = null;
             }
-            else SetCard(FailedLogons, tLogon.Result, false, "Security log", warnAt: 5, badAt: 50);
+            else SetCard(FailedLogons, logons, false, "Security log", warnAt: 5, badAt: 50);
 
-            BuildHeatmap(errors);
-            ComputeScore(shutdowns.Count, bsod.Count, crashes.Count, disk.Count, CountToday(errors));
-
-            await LoadTimelineAsync(window);
-            Status = $"Updated {DateTime.Now:t}";
+            await tTimeline;
+            Status = $"Updated {DateTime.Now:t} · {sw.Elapsed.TotalSeconds:0.0} s";
         }
         catch (Exception ex)
         {
             Status = "Error: " + ex.Message;
+            Verdict = "Can't read logs";
+            VerdictDetail = ex.Message;
         }
         finally
         {
             IsLoading = false;
         }
     }
+
+    private static string FormatSpan(TimeSpan up) =>
+        up.TotalDays >= 1 ? $"{(int)up.TotalDays} d {up.Hours} h" : $"{up.Hours} h {up.Minutes} min";
 
     // ---------- cards ----------
 
@@ -172,7 +283,8 @@ public sealed class DashboardViewModel : ObservableObject
     }
 
     private static bool IsDiskProvider(string p) =>
-        p is "disk" or "Disk" or "storahci" or "stornvme" or "Ntfs" or "Microsoft-Windows-Ntfs" || p.StartsWith("iaStor", StringComparison.OrdinalIgnoreCase);
+        p is "disk" or "Disk" or "storahci" or "stornvme" or "Ntfs" or "Microsoft-Windows-Ntfs"
+        || p.StartsWith("iaStor", StringComparison.OrdinalIgnoreCase);
 
     // ---------- heatmap ----------
 
@@ -219,15 +331,41 @@ public sealed class DashboardViewModel : ObservableObject
 
     // ---------- timeline ----------
 
-    private async Task LoadTimelineAsync(TimeSpan window)
+    private async Task LoadTimelineAsync()
     {
-        var sys = SafeQuery("System", EventLogService.BuildXPath(null, window, [41, 6008, 1074, 1001, 7031, 7034, 7, 55]), 40, true);
-        var app = SafeQuery("Application", EventLogService.BuildXPath(null, window, [1000, 1002, 1026]), 40, true);
-        await Task.WhenAll(sys, app);
+        var sys = SafeQuery(["System"], EventLogService.BuildXPath(null, Month, [41, 6008, 1074, 1001, 7031, 7034, 7, 55]), 40, true);
+        var app = SafeQuery(["Application"], EventLogService.BuildXPath(null, Month, [1000, 1002, 1026]), 40, true);
+        var all = (await sys ?? new List<EventItem>()).Concat(await app ?? new List<EventItem>()).OrderByDescending(e => e.TimeCreated).Take(25).ToList();
 
         Timeline.Clear();
-        foreach (var e in (sys.Result ?? new List<EventItem>()).Concat(app.Result ?? new List<EventItem>()).OrderByDescending(e => e.TimeCreated).Take(25))
-            Timeline.Add(e);
+        foreach (var e in all) Timeline.Add(e);
+    }
+
+    // ---------- export ----------
+
+    private async Task ExportAsync()
+    {
+        var dlg = new SaveFileDialog
+        {
+            Title = "Export health report",
+            Filter = "HTML report (*.html)|*.html",
+            FileName = $"EventLens-{MachineName}-{DateTime.Now:yyyy-MM-dd}.html",
+        };
+        if (dlg.ShowDialog() != true) return;
+
+        List<RestartInfo>? restarts = null;
+        try { restarts = await RestartAnalyzer.AnalyzeAsync(10); } catch { /* optional section */ }
+
+        try
+        {
+            await File.WriteAllTextAsync(dlg.FileName, ReportService.Build(this, restarts));
+            Process.Start(new ProcessStartInfo(dlg.FileName) { UseShellExecute = true });
+            Status = "Report saved: " + Path.GetFileName(dlg.FileName);
+        }
+        catch (Exception ex)
+        {
+            Status = "Export failed: " + ex.Message;
+        }
     }
 
     // ---------- helpers ----------
@@ -236,9 +374,9 @@ public sealed class DashboardViewModel : ObservableObject
         $"*[System[Level={level} and TimeCreated[timediff(@SystemTime) <= {(long)window.TotalMilliseconds}]]]";
 
     /// <summary>Returns null when access is denied (e.g. Security log without elevation).</summary>
-    private static async Task<List<EventItem>?> SafeQuery(string log, string xpath, int max, bool withMessages = false)
+    private static async Task<List<EventItem>?> SafeQuery(string[] logs, string xpath, int max, bool withMessages = false)
     {
-        try { return await EventLogService.QueryAsync(log, xpath, max, withMessages); }
+        try { return await EventLogService.QueryLogsAsync(logs, xpath, max, withMessages); }
         catch (UnauthorizedAccessException) { return null; }
         catch { return new List<EventItem>(); }
     }

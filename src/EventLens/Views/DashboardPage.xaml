@@ -4,6 +4,7 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:conv="clr-namespace:EventLens.Converters"
       xmlns:ctl="clr-namespace:EventLens.Controls"
+      x:Name="Root"
       Title="Overview">
     <Page.Resources>
         <conv:SeverityToBrushConverter x:Key="SevBrush" />
@@ -11,6 +12,7 @@
         <conv:ScoreToBrushConverter x:Key="ScoreBrush" />
         <conv:HeatLevelToBrushConverter x:Key="HeatBrush" />
         <conv:SymbolConverter x:Key="Sym" />
+        <conv:ZeroToVisibleConverter x:Key="ZeroToVis" />
         <FontFamily x:Key="Display">Segoe UI Variable Display, Segoe UI</FontFamily>
 
         <Style x:Key="Surface" TargetType="Border">
@@ -19,6 +21,38 @@
             <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
             <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
             <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <!-- a button that renders only its content; used to make cards clickable -->
+        <Style x:Key="PlainButton" TargetType="Button">
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- card surface that lights up when its parent button is hovered -->
+        <Style x:Key="HoverSurface" TargetType="Border" BasedOn="{StaticResource Surface}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsMouseOver, RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorSecondaryBrush}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="LinkButton" TargetType="Button" BasedOn="{StaticResource PlainButton}">
+            <Setter Property="Foreground" Value="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+            <Setter Property="FontSize" Value="12" />
         </Style>
 
         <Style x:Key="SectionTitle" TargetType="TextBlock">
@@ -35,7 +69,6 @@
             <!-- ============ HERO: health score ============ -->
             <Grid>
                 <Border Style="{StaticResource Surface}" Padding="0" />
-                <!-- tinted glow from the left, colored by score -->
                 <Border CornerRadius="12" IsHitTestVisible="False"
                         Background="{Binding Score, Converter={StaticResource ScoreBrush}, ConverterParameter=soft}">
                     <Border.OpacityMask>
@@ -53,26 +86,36 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- ring -->
-                    <Grid Width="150" Height="150">
-                        <ctl:RingGauge Value="{Binding Score}" Thickness="12"
-                                       RingBrush="{Binding Score, Converter={StaticResource ScoreBrush}}" />
-                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="{Binding Score}" FontFamily="{StaticResource Display}"
-                                       FontSize="46" FontWeight="SemiBold" HorizontalAlignment="Center" />
-                            <TextBlock Text="HEALTH" FontSize="11" HorizontalAlignment="Center" Margin="0,-4,0,0"
-                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                        </StackPanel>
-                    </Grid>
+                    <!-- ring (click = problems behind the score) -->
+                    <Button Style="{StaticResource PlainButton}" Command="{Binding OpenIssuesCommand}" ToolTip="Show the problems behind the score">
+                        <Grid Width="150" Height="150">
+                            <ctl:RingGauge Value="{Binding Score}" Thickness="12"
+                                           RingBrush="{Binding Score, Converter={StaticResource ScoreBrush}}" />
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Score}" FontFamily="{StaticResource Display}"
+                                           FontSize="46" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                                <TextBlock Text="HEALTH" FontSize="11" HorizontalAlignment="Center" Margin="0,-4,0,0"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </Grid>
+                    </Button>
 
                     <!-- verdict -->
                     <StackPanel Grid.Column="1" Margin="32,0,16,0" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding MachineName}" FontSize="13"
-                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <StackPanel Orientation="Horizontal">
+                            <ui:SymbolIcon Symbol="Desktop24" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock Text="{Binding MachineName}" FontSize="13" Margin="6,0,0,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
                         <TextBlock Text="{Binding Verdict}" FontFamily="{StaticResource Display}" FontSize="38"
                                    FontWeight="SemiBold" Margin="0,2,0,6"
                                    Foreground="{Binding Score, Converter={StaticResource ScoreBrush}}" />
-                        <TextBlock Text="{Binding VerdictDetail}" FontSize="15" TextWrapping="Wrap" />
+                        <Button Style="{StaticResource PlainButton}" Command="{Binding OpenIssuesCommand}" HorizontalAlignment="Left">
+                            <TextBlock FontSize="15" TextWrapping="Wrap">
+                                <Run Text="{Binding VerdictDetail, Mode=OneWay}" />
+                                <Run Text="  View →" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                            </TextBlock>
+                        </Button>
                         <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
                             <ui:SymbolIcon Symbol="Clock24" FontSize="16" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBlock Margin="6,0,20,0" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
@@ -86,10 +129,20 @@
                     </StackPanel>
 
                     <!-- actions -->
-                    <StackPanel Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right">
-                        <ui:Button Content="Refresh" Appearance="Primary" Command="{Binding RefreshCommand}" HorizontalAlignment="Right">
+                    <StackPanel Grid.Column="2" VerticalAlignment="Top" HorizontalAlignment="Right" MinWidth="190">
+                        <ui:Button Content="Refresh" Appearance="Primary" Command="{Binding RefreshCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,6">
                             <ui:Button.Icon>
                                 <ui:SymbolIcon Symbol="ArrowClockwise24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:Button Content="Why did it restart?" Command="{Binding WhyRestartCommand}" HorizontalAlignment="Stretch" Margin="0,0,0,6">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="ArrowReset24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:Button Content="Export report" Command="{Binding ExportCommand}" HorizontalAlignment="Stretch">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="DocumentArrowDown24" />
                             </ui:Button.Icon>
                         </ui:Button>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
@@ -112,44 +165,43 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="236" Height="158" Margin="0,0,12,12" Padding="16,14">
-                            <Border.Style>
-                                <Style TargetType="Border" BasedOn="{StaticResource Surface}">
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorSecondaryBrush}" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="*" />
-                                </Grid.RowDefinitions>
+                        <Button Style="{StaticResource PlainButton}" Margin="0,0,12,12"
+                                Command="{Binding DataContext.OpenCardCommand, ElementName=Root}" CommandParameter="{Binding}"
+                                ToolTip="Click to see these events">
+                            <Border Width="236" Height="158" Padding="16,14" Style="{StaticResource HoverSurface}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
 
-                                <StackPanel Orientation="Horizontal">
-                                    <Border Width="30" Height="30" CornerRadius="15"
-                                            Background="{Binding State, Converter={StaticResource StateBrush}, ConverterParameter=soft}">
-                                        <ui:SymbolIcon Symbol="{Binding Icon, Converter={StaticResource Sym}}" FontSize="16"
-                                                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                       Foreground="{Binding State, Converter={StaticResource StateBrush}}" />
-                                    </Border>
-                                    <TextBlock Text="{Binding Title}" Margin="10,0,0,0" VerticalAlignment="Center"
-                                               FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="160" />
-                                </StackPanel>
+                                    <Grid>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Border Width="30" Height="30" CornerRadius="15"
+                                                    Background="{Binding State, Converter={StaticResource StateBrush}, ConverterParameter=soft}">
+                                                <ui:SymbolIcon Symbol="{Binding Icon, Converter={StaticResource Sym}}" FontSize="16"
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{Binding State, Converter={StaticResource StateBrush}}" />
+                                            </Border>
+                                            <TextBlock Text="{Binding Title}" Margin="10,0,0,0" VerticalAlignment="Center"
+                                                       FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="150" />
+                                        </StackPanel>
+                                        <ui:SymbolIcon Symbol="ChevronRight16" HorizontalAlignment="Right" FontSize="12"
+                                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                    </Grid>
 
-                                <TextBlock Grid.Row="1" Text="{Binding Value}" FontFamily="{StaticResource Display}"
-                                           FontSize="34" FontWeight="SemiBold" Margin="0,6,0,0" />
-                                <TextBlock Grid.Row="2" Text="{Binding Hint}" FontSize="12" Margin="0,-2,0,0"
-                                           TextTrimming="CharacterEllipsis"
-                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                                <ctl:Sparkline Grid.Row="3" Margin="0,8,0,0" Values="{Binding Spark}"
-                                               Stroke="{Binding State, Converter={StaticResource StateBrush}}" />
-                            </Grid>
-                        </Border>
+                                    <TextBlock Grid.Row="1" Text="{Binding Value}" FontFamily="{StaticResource Display}"
+                                               FontSize="34" FontWeight="SemiBold" Margin="0,6,0,0" />
+                                    <TextBlock Grid.Row="2" Text="{Binding Hint}" FontSize="12" Margin="0,-2,0,0"
+                                               TextTrimming="CharacterEllipsis"
+                                               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                    <ctl:Sparkline Grid.Row="3" Margin="0,8,0,0" Values="{Binding Spark}"
+                                                   Stroke="{Binding State, Converter={StaticResource StateBrush}}" />
+                                </Grid>
+                            </Border>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -166,16 +218,25 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Height="34" Margin="2" CornerRadius="5" ToolTip="{Binding Tip}"
-                                        Background="{Binding Level, Converter={StaticResource HeatBrush}}">
-                                    <TextBlock Text="{Binding DayLabel}" FontSize="10" Opacity="0.6"
-                                               HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                </Border>
+                                <Button Style="{StaticResource PlainButton}" ToolTip="{Binding Tip}"
+                                        Command="{Binding DataContext.OpenDayCommand, ElementName=Root}" CommandParameter="{Binding}">
+                                    <Border x:Name="Cell" Height="34" Margin="2" CornerRadius="5" BorderThickness="1" BorderBrush="Transparent"
+                                            Background="{Binding Level, Converter={StaticResource HeatBrush}}">
+                                        <TextBlock Text="{Binding DayLabel}" FontSize="10" Opacity="0.7"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+                                </Button>
+                                <DataTemplate.Triggers>
+                                    <Trigger SourceName="Cell" Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Cell" Property="BorderBrush" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                                    </Trigger>
+                                </DataTemplate.Triggers>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
                     <Grid Margin="2,10,2,0">
-                        <TextBlock Text="30 days ago" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        <Button Style="{StaticResource LinkButton}" Content="← 30 days ago (all errors)" HorizontalAlignment="Left"
+                                Command="{Binding OpenMonthCommand}" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                             <TextBlock Text="Less" FontSize="12" Margin="0,0,6,0" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                             <Border Width="12" Height="12" CornerRadius="3" Margin="2,0" Background="{Binding Source=0, Converter={StaticResource HeatBrush}}" />
@@ -185,7 +246,8 @@
                             <Border Width="12" Height="12" CornerRadius="3" Margin="2,0" Background="{Binding Source=4, Converter={StaticResource HeatBrush}}" />
                             <TextBlock Text="More" FontSize="12" Margin="6,0,0,0" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                         </StackPanel>
-                        <TextBlock Text="Today" FontSize="12" HorizontalAlignment="Right" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        <Button Style="{StaticResource LinkButton}" Content="Today →" HorizontalAlignment="Right"
+                                Command="{Binding OpenTodayCommand}" />
                     </Grid>
                 </StackPanel>
             </Border>
@@ -193,14 +255,8 @@
             <!-- ============ TIMELINE ============ -->
             <TextBlock Text="What happened" Style="{StaticResource SectionTitle}" />
 
-            <Border Style="{StaticResource Surface}">
-                <Border.Visibility>
-                    <Binding Path="Timeline.Count">
-                        <Binding.Converter>
-                            <conv:ZeroToVisibleConverter />
-                        </Binding.Converter>
-                    </Binding>
-                </Border.Visibility>
+            <Border Style="{StaticResource Surface}"
+                    Visibility="{Binding Timeline.Count, Converter={StaticResource ZeroToVis}}">
                 <StackPanel Orientation="Horizontal">
                     <ui:SymbolIcon Symbol="CheckmarkCircle24" FontSize="22" Foreground="{Binding Source=Good, Converter={StaticResource StateBrush}}" />
                     <TextBlock Text="No restarts, crashes or failures in the last 30 days." Margin="10,0,0,0" VerticalAlignment="Center" />
@@ -217,17 +273,15 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <!-- time -->
-                            <StackPanel Margin="0,14,0,0" HorizontalAlignment="Right">
+                            <StackPanel Margin="0,16,0,0" HorizontalAlignment="Right">
                                 <TextBlock Text="{Binding TimeCreated, StringFormat='d MMM'}" FontWeight="SemiBold" HorizontalAlignment="Right" />
                                 <TextBlock Text="{Binding TimeCreated, StringFormat='HH:mm'}" FontSize="12" HorizontalAlignment="Right"
                                            Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                             </StackPanel>
 
-                            <!-- rail + node -->
                             <Rectangle Grid.Column="1" Width="2" HorizontalAlignment="Center"
                                        Fill="{DynamicResource ControlStrokeColorDefaultBrush}" />
-                            <Border Grid.Column="1" Width="32" Height="32" CornerRadius="16" Margin="0,12,0,0"
+                            <Border Grid.Column="1" Width="32" Height="32" CornerRadius="16" Margin="0,14,0,0"
                                     VerticalAlignment="Top" HorizontalAlignment="Center" BorderThickness="2"
                                     Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
                                     BorderBrush="{Binding Severity, Converter={StaticResource SevBrush}}">
@@ -236,25 +290,30 @@
                                                Foreground="{Binding Severity, Converter={StaticResource SevBrush}}" />
                             </Border>
 
-                            <!-- card -->
-                            <ui:CardExpander Grid.Column="2" Margin="0,6,0,6">
-                                <ui:CardExpander.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}">
-                                            <Run Text="{Binding Provider, Mode=OneWay}" />
-                                            <Run Text=" · ID " />
-                                            <Run Text="{Binding Id, Mode=OneWay}" />
-                                        </TextBlock>
-                                    </StackPanel>
-                                </ui:CardExpander.Header>
-                                <StackPanel>
-                                    <TextBlock Text="{Binding Explanation.What}" TextWrapping="Wrap" Margin="0,0,0,6" />
-                                    <TextBlock Text="{Binding Explanation.Action}" TextWrapping="Wrap" FontWeight="SemiBold" Margin="0,0,0,10" />
-                                    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" FontFamily="Cascadia Mono, Consolas"
-                                               FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                </StackPanel>
-                            </ui:CardExpander>
+                            <Button Grid.Column="2" Style="{StaticResource PlainButton}" Margin="0,6,0,6"
+                                    Command="{Binding DataContext.OpenEventCommand, ElementName=Root}" CommandParameter="{Binding}"
+                                    ToolTip="Open in Events">
+                                <Border Style="{StaticResource HoverSurface}" Padding="16,12">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Summary}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Explanation.What}" FontSize="13" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
+                                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                            <TextBlock FontSize="12" Margin="0,2,0,0" Foreground="{DynamicResource TextFillColorTertiaryBrush}">
+                                                <Run Text="{Binding Provider, Mode=OneWay}" />
+                                                <Run Text=" · ID " />
+                                                <Run Text="{Binding Id, Mode=OneWay}" />
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <ui:SymbolIcon Grid.Column="1" Symbol="ChevronRight16" FontSize="12" VerticalAlignment="Center" Margin="12,0,0,0"
+                                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                    </Grid>
+                                </Border>
+                            </Button>
                         </Grid>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>

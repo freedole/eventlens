@@ -1,22 +1,23 @@
 using System.Windows.Controls;
-using EventLens.ViewModels;
+using EventLens.Models;
+using EventLens.Services;
 
 namespace EventLens.Views;
 
 public partial class EventsPage : Page
 {
-    private static readonly EventsViewModel Vm = new();
-    private static bool _loaded;
-
     public EventsPage()
     {
         InitializeComponent();
-        DataContext = Vm;
-        Loaded += async (_, _) =>
+        var vm = Navigator.Events;
+        DataContext = vm;
+
+        void OnSelect(object? s, EventRow row) => Dispatcher.InvokeAsync(() => EventGrid.ScrollIntoView(row));
+        Loaded += (_, _) =>
         {
-            if (_loaded) return;
-            _loaded = true;
-            await Vm.RefreshAsync();
+            vm.SelectionRequested += OnSelect;
+            vm.EnsureLoaded();
         };
+        Unloaded += (_, _) => vm.SelectionRequested -= OnSelect;
     }
 }

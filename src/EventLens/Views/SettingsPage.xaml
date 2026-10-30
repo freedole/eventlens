@@ -4,14 +4,14 @@
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       Title="Settings">
     <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="32,16,32,32" MaxWidth="900" HorizontalAlignment="Left">
-            <TextBlock Text="Settings" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,20" />
+        <StackPanel Margin="32,12,32,32" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,20" />
 
             <ui:CardControl Margin="0,0,0,6" Header="Theme">
                 <ui:CardControl.Icon>
                     <ui:SymbolIcon Symbol="DarkTheme24" />
                 </ui:CardControl.Icon>
-                <ComboBox Width="160" ItemsSource="{Binding Themes}" SelectedIndex="{Binding ThemeIndex}" />
+                <ComboBox Width="180" ItemsSource="{Binding Themes}" SelectedIndex="{Binding ThemeIndex}" />
             </ui:CardControl>
 
             <ui:CardControl Margin="0,0,0,6">
@@ -28,7 +28,70 @@
                 <ui:Button Content="Restart as administrator" Command="{Binding RestartAsAdminCommand}" />
             </ui:CardControl>
 
-            <TextBlock Text="About" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,8" />
+            <!-- AI -->
+            <TextBlock Text="AI assistant" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,4" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                       Text="Optional. Use your own key - event text is sent only when you press Ask AI. Keys are encrypted for your Windows account (DPAPI)." />
+
+            <Border CornerRadius="10" Padding="20" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Service" VerticalAlignment="Center" />
+                    <ComboBox Grid.Column="1" ItemsSource="{Binding ProviderNames}" SelectedIndex="{Binding ProviderIndex}" Margin="0,0,0,10" />
+
+                    <TextBlock Grid.Row="1" Text="API key" VerticalAlignment="Center" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,0,10">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <PasswordBox x:Name="KeyInput" />
+                            <ui:Button Grid.Column="1" Content="Save key" Margin="8,0,0,0" Click="OnSaveKey" />
+                        </Grid>
+                        <TextBlock Text="{Binding KeyHint}" FontSize="12" Margin="0,4,0,0"
+                                   Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="2" Text="Model" VerticalAlignment="Center" />
+                    <ui:TextBox Grid.Row="2" Grid.Column="1" Margin="0,0,0,10" PlaceholderText="{Binding ModelPlaceholder}"
+                                Text="{Binding Model, UpdateSourceTrigger=LostFocus}" />
+
+                    <TextBlock Grid.Row="3" Text="Endpoint" VerticalAlignment="Center" />
+                    <ui:TextBox Grid.Row="3" Grid.Column="1" Margin="0,0,0,10" PlaceholderText="{Binding EndpointPlaceholder}"
+                                Text="{Binding Endpoint, UpdateSourceTrigger=LostFocus}" />
+
+                    <TextBlock Grid.Row="4" Text="Answer language" VerticalAlignment="Center" />
+                    <ComboBox Grid.Row="4" Grid.Column="1" ItemsSource="{Binding LanguageNames}" SelectedIndex="{Binding LanguageIndex}" Margin="0,0,0,12" />
+
+                    <StackPanel Grid.Row="5" Grid.Column="1" Orientation="Horizontal">
+                        <ui:Button Content="Test connection" Command="{Binding TestAiCommand}">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="Sparkle24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:ProgressRing IsIndeterminate="True" Width="16" Height="16" Margin="12,0,0,0"
+                                         Visibility="{Binding AiBusy, Converter={StaticResource BoolToVis}}" />
+                        <TextBlock Text="{Binding AiStatus}" Margin="12,0,0,0" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="460" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- About -->
+            <TextBlock Text="About" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,8" />
             <ui:Card>
                 <StackPanel>
                     <TextBlock FontSize="16" FontWeight="SemiBold">

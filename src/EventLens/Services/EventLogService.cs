@@ -1,4 +1,5 @@
 using System.Diagnostics.Eventing.Reader;
+using System.Globalization;
 using EventLens.Models;
 
 namespace EventLens.Services;
@@ -7,8 +8,9 @@ public static class EventLogService
 {
     public static readonly string[] StandardLogs = ["System", "Application", "Security", "Setup"];
 
-    /// <summary>Builds an XPath filter for level and time window.</summary>
-    public static string BuildXPath(Severity? maxSeverity, TimeSpan? window, IEnumerable<int>? ids = null)
+    /// <summary>Builds an XPath filter. Window = relative to now; From/To = absolute (local time).</summary>
+    public static string BuildXPath(Severity? maxSeverity, TimeSpan? window, IEnumerable<int>? ids = null,
+        DateTime? from = null, DateTime? to = null, IEnumerable<string>? providers = null)
     {
         var parts = new List<string>();
 
@@ -20,75 +22,112 @@ public static class EventLogService
             parts.Add("(" + string.Join(" or ", levels) + ")");
         }
 
-        if (window is { } w)
-            parts.Add($"TimeCreated[timediff(@SystemTime) <= {(long)w.TotalMilliseconds}]");
-
-        if (ids is not null)
+        if (from is not null || to is not null)
         {
-            var idList = ids.ToList();
-            if (idList.Count > 0)
-                parts.Add("(" + string.Join(" or ", idList.Select(i => $"EventID={i}")) + ")");
+            var t = new List<string>();
+            if (from is { } f) t.Add($"@SystemTime>='{Utc(f)}'");
+            if (to is { } u) t.Add($"@SystemTime<'{Utc(u)}'");
+            parts.Add($"TimeCreated[{string.Join(" and ", t)}]");
         }
+        else if (window is { } w)
+        {
+            parts.Add($"TimeCreated[timediff(@SystemTime) <= {(long)w.TotalMilliseconds}]");
+        }
+
+        var idList = ids?.ToList();
+        if (idList is { Count: > 0 })
+            parts.Add("(" + string.Join(" or ", idList.Select(i => $"EventID={i}")) + ")");
+
+        var provList = providers?.ToList();
+        if (provList is { Count: > 0 })
+            parts.Add("Provider[" + string.Join(" or ", provList.Select(p => $"@Name='{p.Replace("'", "")}'")) + "]");
 
         return parts.Count == 0 ? "*" : $"*[System[{string.Join(" and ", parts)}]]";
     }
 
+    public static string BuildXPath(EventQuerySpec spec) =>
+        BuildXPath(spec.MaxLevel, spec.Window, spec.Ids, spec.From, spec.To, spec.Providers);
+
+    private static string Utc(DateTime local) =>
+        local.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture);
+
+    /// <summary>Reads one log (newest first). onBatch is called with partial results for progressive UI.</summary>
     public static Task<List<EventItem>> QueryAsync(
-        string log, string xpath, int max, bool withMessages = true, string? computer = null,
-        CancellationToken ct = default)
+        string log, string xpath, int max, bool withMessages = true,
+        CancellationToken ct = default, Action<IReadOnlyList<EventItem>>? onBatch = null, EventSource? source = null)
     {
+        source ??= AppState.Source;
         return Task.Run(() =>
         {
             var result = new List<EventItem>(Math.Min(max, 4096));
-            var query = new EventLogQuery(log, PathType.LogName, xpath) { ReverseDirection = true };
-            if (!string.IsNullOrWhiteSpace(computer))
-                query.Session = new EventLogSession(computer);
+            var batch = new List<EventItem>(256);
+            var query = source.CreateQuery(log, xpath);
 
             using var reader = new EventLogReader(query);
             EventRecord? rec;
             while (result.Count < max && (rec = reader.ReadEvent()) is not null)
             {
                 ct.ThrowIfCancellationRequested();
+                EventItem item;
                 using (rec)
-                    result.Add(Map(rec, log, withMessages));
+                    item = Map(rec, log, withMessages);
+                result.Add(item);
+
+                if (onBatch is not null)
+                {
+                    batch.Add(item);
+                    if (batch.Count >= 200)
+                    {
+                        onBatch(batch.ToArray());
+                        batch.Clear();
+                    }
+                }
             }
+            if (onBatch is not null && batch.Count > 0) onBatch(batch.ToArray());
             return result;
         }, ct);
     }
 
-    public static Task<int> CountAsync(string log, string xpath, int cap = 10000, CancellationToken ct = default)
+    /// <summary>Reads several logs and merges them newest-first. In file mode the file is read once.</summary>
+    public static async Task<List<EventItem>> QueryLogsAsync(
+        IEnumerable<string> logs, string xpath, int max, bool withMessages = true,
+        CancellationToken ct = default, Action<IReadOnlyList<EventItem>>? onBatch = null)
     {
-        return Task.Run(() =>
+        var source = AppState.Source;
+        List<string> list = source.IgnoresLogName ? new List<string> { "(file)" } : logs.Distinct().ToList();
+        var all = new List<EventItem>();
+        Exception? firstError = null;
+
+        foreach (var log in list)
         {
             try
             {
-                var query = new EventLogQuery(log, PathType.LogName, xpath);
-                using var reader = new EventLogReader(query);
-                int n = 0;
-                EventRecord? rec;
-                while (n < cap && (rec = reader.ReadEvent()) is not null)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    rec.Dispose();
-                    n++;
-                }
-                return n;
+                all.AddRange(await QueryAsync(log, xpath, max, withMessages, ct, onBatch, source));
             }
-            catch (EventLogNotFoundException) { return 0; }
-            catch (UnauthorizedAccessException) { return -1; }
-        }, ct);
+            catch (OperationCanceledException) { throw; }
+            catch (Exception ex) when (list.Count > 1 && ex is UnauthorizedAccessException or EventLogNotFoundException)
+            {
+                firstError ??= ex; // e.g. Security without elevation - keep the other logs
+            }
+        }
+
+        if (all.Count == 0 && firstError is not null) throw firstError;
+        return all.OrderByDescending(e => e.TimeCreated).Take(max).ToList();
     }
 
-    private static EventItem Map(EventRecord rec, string log, bool withMessage)
+    private static EventItem Map(EventRecord rec, string log, bool full)
     {
         var provider = rec.ProviderName ?? "";
         string message = "";
-        if (withMessage)
+        IReadOnlyList<string> data = [];
+
+        if (full)
         {
             try { message = rec.FormatDescription() ?? ""; }
             catch { /* provider metadata missing */ }
+            data = ReadData(rec);
             if (string.IsNullOrEmpty(message))
-                message = FallbackMessage(rec);
+                message = string.Join(Environment.NewLine, data);
         }
 
         return new EventItem
@@ -102,18 +141,18 @@ public static class EventLogService
             MachineName = rec.MachineName ?? "",
             UserId = rec.UserId?.Value,
             RecordId = rec.RecordId,
+            Data = data,
             Explanation = EventKnowledge.Lookup(provider, rec.Id),
         };
     }
 
-    private static string FallbackMessage(EventRecord rec)
+    private static IReadOnlyList<string> ReadData(EventRecord rec)
     {
         try
         {
-            var props = rec.Properties?.Select(p => p.Value?.ToString()).Where(s => !string.IsNullOrWhiteSpace(s));
-            return props is null ? "" : string.Join(Environment.NewLine, props);
+            return rec.Properties?.Select(p => p.Value?.ToString() ?? "").ToArray() ?? Array.Empty<string>();
         }
-        catch { return ""; }
+        catch { return Array.Empty<string>(); }
     }
 
     private static Severity ToSeverity(byte? level) => level switch
@@ -124,4 +163,12 @@ public static class EventLogService
         5 => Severity.Verbose,
         _ => Severity.Information,
     };
+
+    /// <summary>Quick connectivity/permission check for a source.</summary>
+    public static Task TestAsync(EventSource source) => Task.Run(() =>
+    {
+        var q = source.CreateQuery("System", "*");
+        using var reader = new EventLogReader(q);
+        using var rec = reader.ReadEvent();
+    });
 }

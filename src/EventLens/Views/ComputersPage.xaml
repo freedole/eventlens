@@ -1,0 +1,160 @@
+<Page x:Class="EventLens.Views.ComputersPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:conv="clr-namespace:EventLens.Converters"
+      x:Name="Root"
+      Title="Computers">
+    <Page.Resources>
+        <conv:SymbolConverter x:Key="Sym" />
+        <FontFamily x:Key="Display">Segoe UI Variable Display, Segoe UI</FontFamily>
+        <Style x:Key="Surface" TargetType="Border">
+            <Setter Property="CornerRadius" Value="12" />
+            <Setter Property="Padding" Value="22" />
+            <Setter Property="Margin" Value="0,0,0,14" />
+            <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style x:Key="CardTitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Display}" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+    </Page.Resources>
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,12,32,32" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="Computers" FontFamily="{StaticResource Display}" FontSize="28" FontWeight="SemiBold" />
+            <TextBlock Text="Choose what EventLens reads: this computer, a computer on your network, or a saved .evtx file."
+                       Margin="0,4,0,18" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+
+            <!-- current -->
+            <Border Style="{StaticResource Surface}" BorderBrush="{DynamicResource AccentFillColorDefaultBrush}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Border Width="48" Height="48" CornerRadius="24" Background="{DynamicResource AccentFillColorDefaultBrush}">
+                        <ui:SymbolIcon Symbol="{Binding CurrentIcon, Converter={StaticResource Sym}}" FontSize="22"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="16,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentKind}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <TextBlock Text="{Binding CurrentName}" FontSize="18" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <ui:Button Grid.Column="2" Content="Back to this computer" Command="{Binding UseLocalCommand}"
+                               VerticalAlignment="Center"
+                               Visibility="{Binding IsNotLocal, Converter={StaticResource BoolToVis}}">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="Desktop24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </Grid>
+            </Border>
+
+            <!-- remote -->
+            <Border Style="{StaticResource Surface}">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                        <ui:SymbolIcon Symbol="DesktopArrowRight24" FontSize="20" Margin="0,0,10,0" />
+                        <TextBlock Text="Remote computer" Style="{StaticResource CardTitle}" />
+                    </StackPanel>
+                    <TextBlock Text="Leave user and password empty to connect with your current Windows account."
+                               FontSize="12" Margin="0,0,0,14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Computer name or IP" FontSize="12" Margin="0,0,0,4" />
+                            <ui:TextBox PlaceholderText="SRV-DC01 or 10.0.0.5" Text="{Binding Computer, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="User (optional)" FontSize="12" Margin="0,0,0,4" />
+                            <ui:TextBox PlaceholderText="DOMAIN\admin" Text="{Binding User, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="Password" FontSize="12" Margin="0,0,0,4" />
+                            <PasswordBox x:Name="PasswordInput" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                        <ui:Button Content="Connect" Appearance="Primary" Click="OnConnect" IsEnabled="{Binding IsBusy, Converter={StaticResource InvertBool}}">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="PlugConnected24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:ProgressRing IsIndeterminate="True" Width="16" Height="16" Margin="12,0,0,0"
+                                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
+                    </StackPanel>
+
+                    <!-- recent -->
+                    <ItemsControl ItemsSource="{Binding Recent}" Margin="0,12,0,0">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <ui:Button Appearance="Secondary" Margin="0,0,6,6" Padding="10,4" Content="{Binding}"
+                                           ToolTip="Recent - click to fill in"
+                                           Command="{Binding DataContext.PickRecentCommand, ElementName=Root}" CommandParameter="{Binding}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <TextBlock Margin="0,10,0,0" FontSize="12" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                               Text="Requirements on the target: firewall rule group &quot;Remote Event Log Management&quot; enabled, and an account in Administrators or Event Log Readers." />
+                </StackPanel>
+            </Border>
+
+            <!-- file -->
+            <Border Style="{StaticResource Surface}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                            <ui:SymbolIcon Symbol="DocumentText24" FontSize="20" Margin="0,0,10,0" />
+                            <TextBlock Text="Log file (.evtx)" Style="{StaticResource CardTitle}" />
+                        </StackPanel>
+                        <TextBlock Text="Open a log someone sent you (Event Viewer → Save All Events As…)." TextWrapping="Wrap"
+                                   FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                    <ui:Button Grid.Column="1" Content="Open file…" Command="{Binding OpenFileCommand}" VerticalAlignment="Center">
+                        <ui:Button.Icon>
+                            <ui:SymbolIcon Symbol="FolderOpen24" />
+                        </ui:Button.Icon>
+                    </ui:Button>
+                </Grid>
+            </Border>
+
+            <!-- status -->
+            <TextBlock Text="{Binding Status}" TextWrapping="Wrap" Margin="2,4,0,0">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding StatusIsError}" Value="True">
+                                <Setter Property="Foreground" Value="#FF5A5F" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

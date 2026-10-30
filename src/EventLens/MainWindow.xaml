@@ -4,7 +4,8 @@
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  xmlns:views="clr-namespace:EventLens.Views"
                  Title="EventLens"
-                 Width="1240" Height="780" MinWidth="960" MinHeight="580"
+                 Icon="pack://application:,,,/Assets/eventlens.ico"
+                 Width="1280" Height="820" MinWidth="980" MinHeight="600"
                  WindowStartupLocation="CenterScreen"
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica"
@@ -15,7 +16,11 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="EventLens" />
+        <ui:TitleBar Grid.Row="0" Title="EventLens">
+            <ui:TitleBar.Icon>
+                <ui:ImageIcon Source="pack://application:,,,/Assets/eventlens-32.png" />
+            </ui:TitleBar.Icon>
+        </ui:TitleBar>
 
         <ui:NavigationView x:Name="RootNavigation"
                            Grid.Row="1"
@@ -32,6 +37,16 @@
                 <ui:NavigationViewItem Content="Events" TargetPageType="{x:Type views:EventsPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="List24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Restarts" TargetPageType="{x:Type views:RestartsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="ArrowReset24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Computers" TargetPageType="{x:Type views:ComputersPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Desktop24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
