@@ -19,7 +19,7 @@ public static class ReportService
 <title>EventLens report - {{H(d.MachineName)}}</title>
 <style>
 :root{--bg:#f6f7f9;--card:#fff;--text:#1b1f24;--muted:#5f6b7a;--line:#e3e7ec}
-@media (prefers-color-scheme:dark){:root{--bg:#16181c;--card:#1f2228;--text:#eceff3;--muted:#9aa5b1;--line:#2c3038}}
+@media (prefers-color-scheme:dark){:root{--bg:#16181c;--card:#1f2228;--text:#eceff3;--muted:#9aa5b1;--line:#2c3038} }
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",system-ui,sans-serif}
 .wrap{max-width:960px;margin:0 auto;padding:32px 20px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;margin-bottom:16px}
