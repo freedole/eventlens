@@ -1,0 +1,49 @@
+<Page x:Class="EventLens.Views.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      Title="Settings">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="32,16,32,32" MaxWidth="900" HorizontalAlignment="Left">
+            <TextBlock Text="Settings" FontSize="28" FontWeight="SemiBold" Margin="0,0,0,20" />
+
+            <ui:CardControl Margin="0,0,0,6" Header="Theme">
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="DarkTheme24" />
+                </ui:CardControl.Icon>
+                <ComboBox Width="160" ItemsSource="{Binding Themes}" SelectedIndex="{Binding ThemeIndex}" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,6">
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="Shield24" />
+                </ui:CardControl.Icon>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Permissions" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding AdminText}" FontSize="12"
+                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:Button Content="Restart as administrator" Command="{Binding RestartAsAdminCommand}" />
+            </ui:CardControl>
+
+            <TextBlock Text="About" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,8" />
+            <ui:Card>
+                <StackPanel>
+                    <TextBlock FontSize="16" FontWeight="SemiBold">
+                        <Run Text="EventLens " /><Run Text="{Binding Version, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Text="Readable Windows Event Log - what happened and why." Margin="0,4,0,0" />
+                    <TextBlock Text="{Binding KnowledgeInfo}" Margin="0,4,0,0"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <TextBlock Margin="0,8,0,0">
+                        <Hyperlink NavigateUri="https://github.com/freedole/eventlens" RequestNavigate="OnLink">github.com/freedole/eventlens</Hyperlink>
+                    </TextBlock>
+                    <TextBlock Text="MIT License · © 2026 Đorđe Kaurinović" FontSize="12" Margin="0,8,0,0"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+            </ui:Card>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

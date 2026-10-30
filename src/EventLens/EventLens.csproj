@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>EventLens</RootNamespace>
+    <AssemblyName>EventLens</AssemblyName>
+    <Version>0.1.0</Version>
+    <Product>EventLens</Product>
+    <Company>freedole</Company>
+    <Authors>Đorđe Kaurinović</Authors>
+    <Description>Readable Windows Event Log - explains what happened and why.</Description>
+    <Copyright>© 2026 Đorđe Kaurinović</Copyright>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="4.*" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="10.*" />
+  </ItemGroup>
+
+</Project>
