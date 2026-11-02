@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>EventLens.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.*" />
+    <PackageReference Include="xunit" Version="2.*" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.*" />
+  </ItemGroup>
+
+  <!-- The pure logic (knowledge base, rules, parsers) is compiled straight into the tests - no WPF needed. -->
+  <ItemGroup>
+    <Compile Include="..\..\src\EventLens\Core\**\*.cs" Link="Core\%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="..\..\src\EventLens\Models\EventItem.cs" Link="Models\EventItem.cs" />
+    <Compile Include="..\..\src\EventLens\Models\EventQuerySpec.cs" Link="Models\EventQuerySpec.cs" />
+    <EmbeddedResource Include="..\..\knowledge\*.json" LogicalName="kb.%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

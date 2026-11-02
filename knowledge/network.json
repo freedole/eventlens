@@ -1,0 +1,731 @@
+{
+ "entries": [
+  {
+   "provider": "Microsoft-Windows-DNS-Client",
+   "id": 1014,
+   "class": "attention",
+   "category": "Network",
+   "title": "DNS name resolution timed out",
+   "what": "None of the configured DNS servers answered for a name. Occasional timeouts are normal; many mean DNS or connectivity problems.",
+   "causes": [
+    "Internet or VPN dropped",
+    "DNS server slow or unreachable",
+    "Wrong DNS servers configured",
+    "Name only resolvable inside a VPN"
+   ],
+   "fix": [
+    "Check the DNS servers: ipconfig /all",
+    "Test: nslookup <name> <dns-server>",
+    "Harmless if rare and the internet works"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-DNS-Client",
+   "ids": [
+    8015,
+    8018,
+    8019
+   ],
+   "class": "attention",
+   "category": "Network",
+   "title": "Dynamic DNS registration failed",
+   "what": "The computer could not register its name/address in DNS. Other computers may not find it by name.",
+   "causes": [
+    "DNS server does not accept dynamic updates",
+    "No permission on the DNS zone",
+    "DNS server unreachable"
+   ],
+   "fix": [
+    "In a domain: check that the DNS server is a domain DNS and the zone allows secure updates",
+    "At home: harmless, routers usually don't accept registrations"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Dhcp-Client",
+   "id": 1001,
+   "class": "attention",
+   "category": "Network",
+   "title": "No IP address from DHCP",
+   "what": "The network adapter did not get an IP address from a DHCP server.",
+   "causes": [
+    "Router/DHCP server down or full",
+    "Cable or Wi-Fi problem",
+    "VLAN/port misconfiguration"
+   ],
+   "fix": [
+    "ipconfig /release and /renew",
+    "Check the router/DHCP server and its address pool",
+    "Check cable/switch port"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Dhcp-Client",
+   "id": 1003,
+   "class": "attention",
+   "category": "Network",
+   "title": "Could not renew IP address",
+   "what": "The adapter could not renew its DHCP lease.",
+   "causes": [
+    "DHCP server unreachable",
+    "Network disconnect"
+   ],
+   "fix": [
+    "Check connectivity to the DHCP server; renew with ipconfig /renew"
+   ]
+  },
+  {
+   "provider": "Tcpip",
+   "id": 4199,
+   "class": "critical",
+   "category": "Network",
+   "title": "IP address conflict",
+   "what": "Another device on the network uses the same IP address. Both may lose connectivity.",
+   "causes": [
+    "Static IP that is also in the DHCP pool",
+    "Two devices configured with the same static IP"
+   ],
+   "fix": [
+    "Find the other device by the MAC address in the message (arp -a, router's client list)",
+    "Use DHCP reservations instead of static IPs inside the pool"
+   ]
+  },
+  {
+   "provider": "Tcpip",
+   "id": 4227,
+   "class": "attention",
+   "category": "Network",
+   "title": "TCP port reuse limit hit",
+   "what": "TCP could not open an outgoing connection because local ports were recently used - sign of port exhaustion.",
+   "causes": [
+    "A program opening huge numbers of connections",
+    "Very short-lived connections at high rate"
+   ],
+   "fix": [
+    "Find the program: netstat -ano | find /c \"TIME_WAIT\"",
+    "Update or fix the application; increase dynamic port range if needed"
+   ]
+  },
+  {
+   "provider": "Tcpip",
+   "id": 4231,
+   "class": "critical",
+   "category": "Network",
+   "title": "Ephemeral port exhaustion",
+   "what": "TCP/IP could not allocate an outgoing port; all ephemeral ports are in use. New connections fail.",
+   "causes": [
+    "Application leaking connections"
+   ],
+   "fix": [
+    "netstat -ano to find the process with most connections; restart/fix it"
+   ]
+  },
+  {
+   "provider": "NetBT",
+   "id": 4321,
+   "class": "attention",
+   "category": "Network",
+   "title": "NetBIOS name conflict",
+   "what": "The computer's NetBIOS name is already used by another device on the network.",
+   "causes": [
+    "Two computers with the same name",
+    "Cloned machines"
+   ],
+   "fix": [
+    "Rename one of the computers"
+   ]
+  },
+  {
+   "provider": "e1dexpress",
+   "id": 27,
+   "class": "attention",
+   "category": "Network",
+   "title": "Network link down (Intel)",
+   "what": "The Intel network adapter lost its link.",
+   "causes": [
+    "Cable unplugged or damaged",
+    "Switch port down",
+    "Power saving"
+   ],
+   "fix": [
+    "Check cable and switch port",
+    "Disable 'Allow the computer to turn off this device to save power' for the adapter"
+   ]
+  },
+  {
+   "provider": "e1iexpress",
+   "id": 27,
+   "class": "attention",
+   "category": "Network",
+   "title": "Network link down (Intel)",
+   "what": "The Intel network adapter lost its link.",
+   "causes": [
+    "Cable unplugged or damaged",
+    "Switch port down",
+    "Power saving"
+   ],
+   "fix": [
+    "Check cable and switch port",
+    "Disable adapter power saving"
+   ]
+  },
+  {
+   "provider": "e1rexpress",
+   "id": 27,
+   "class": "attention",
+   "category": "Network",
+   "title": "Network link down (Intel)",
+   "what": "The Intel network adapter lost its link.",
+   "causes": [
+    "Cable unplugged or damaged",
+    "Switch port down",
+    "Power saving"
+   ],
+   "fix": [
+    "Check cable and switch port",
+    "Disable adapter power saving"
+   ]
+  },
+  {
+   "provider": "e1dexpress",
+   "id": 32,
+   "class": "info",
+   "category": "Network",
+   "title": "Network link up (Intel)",
+   "what": "The Intel network adapter established a link.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Time-Service",
+   "id": 35,
+   "class": "info",
+   "category": "Network",
+   "title": "Time sync source set",
+   "what": "The time service is now synchronizing with the time source in the message.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Time-Service",
+   "id": 37,
+   "class": "info",
+   "category": "Network",
+   "title": "Receiving valid time",
+   "what": "The time provider is now receiving valid time data.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Time-Service",
+   "id": 36,
+   "class": "attention",
+   "category": "Network",
+   "title": "Time not synchronized for a long time",
+   "what": "The computer clock has not been synchronized for longer than expected.",
+   "causes": [
+    "No network or blocked UDP 123",
+    "Time source unreachable"
+   ],
+   "fix": [
+    "w32tm /resync",
+    "w32tm /query /status",
+    "Allow UDP 123 to the time source"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Time-Service",
+   "id": 129,
+   "class": "attention",
+   "category": "Network",
+   "title": "Cannot find domain time source",
+   "what": "The NTP client could not find a domain controller to sync time with. Kerberos fails if the clock drifts more than 5 minutes.",
+   "causes": [
+    "No connection to a domain controller (VPN off, offline)",
+    "DNS problems"
+   ],
+   "fix": [
+    "Check DC connectivity and DNS",
+    "w32tm /resync /rediscover"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Time-Service",
+   "id": 134,
+   "class": "attention",
+   "category": "Network",
+   "title": "Cannot resolve the NTP server name",
+   "what": "The time service could not resolve the configured NTP server.",
+   "causes": [
+    "DNS not available at startup",
+    "Wrong NTP server name"
+   ],
+   "fix": [
+    "Check: w32tm /query /peers",
+    "Harmless once at boot if it syncs later"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Time-Service",
+   "id": 142,
+   "class": "attention",
+   "category": "Network",
+   "title": "Time service stopped advertising",
+   "what": "This machine stopped acting as a time source because its own clock is not synchronized. Important on domain controllers.",
+   "causes": [
+    "PDC emulator has no reliable external time source"
+   ],
+   "fix": [
+    "Configure the PDC emulator with external NTP servers: w32tm /config /manualpeerlist:... /syncfromflags:manual /reliable:yes /update"
+   ]
+  },
+  {
+   "provider": "NETLOGON",
+   "id": 5719,
+   "class": "attention",
+   "category": "Domain",
+   "title": "No domain controller available",
+   "what": "The computer could not set up a secure session with a domain controller.",
+   "causes": [
+    "Network not ready at boot (common on Wi-Fi)",
+    "VPN not connected",
+    "DNS not pointing to domain DNS servers",
+    "DC offline"
+   ],
+   "fix": [
+    "Harmless once at boot if logons work",
+    "Check that DNS points to domain DNS servers",
+    "Test: nltest /sc_query:<domain>"
+   ],
+   "related": [
+    1129
+   ]
+  },
+  {
+   "provider": "NETLOGON",
+   "id": 3210,
+   "class": "critical",
+   "category": "Domain",
+   "title": "Failed to authenticate with the domain controller",
+   "what": "The computer's secure channel with the domain is broken (machine account password mismatch).",
+   "causes": [
+    "Computer restored from an old snapshot/backup",
+    "Machine account reset or duplicated name"
+   ],
+   "fix": [
+    "Test-ComputerSecureChannel -Repair -Credential (Get-Credential)",
+    "Or rejoin the domain"
+   ]
+  },
+  {
+   "provider": "NETLOGON",
+   "id": 5722,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Computer failed to authenticate (DC side)",
+   "what": "On a domain controller: a computer failed to authenticate because of its account/password.",
+   "causes": [
+    "Client restored from old snapshot",
+    "Stale machine account"
+   ],
+   "fix": [
+    "Repair or rejoin the named computer"
+   ]
+  },
+  {
+   "provider": "NETLOGON",
+   "id": 5723,
+   "class": "attention",
+   "category": "Domain",
+   "title": "No trust account for computer",
+   "what": "On a domain controller: a computer tried to connect but its account does not exist.",
+   "causes": [
+    "Computer account deleted"
+   ],
+   "fix": [
+    "Rejoin the computer to the domain"
+   ]
+  },
+  {
+   "provider": "NETLOGON",
+   "id": 5781,
+   "class": "attention",
+   "category": "Domain",
+   "title": "DC DNS records not registered",
+   "what": "A domain controller could not register its DNS records.",
+   "causes": [
+    "DNS server unreachable or not allowing updates"
+   ],
+   "fix": [
+    "Check DNS on the DC; run dcdiag /test:dns"
+   ]
+  },
+  {
+   "provider": "NETLOGON",
+   "id": 5807,
+   "class": "info",
+   "category": "Domain",
+   "title": "Clients from subnets without a site",
+   "what": "Clients connected from IP subnets not mapped to an AD site. Logon may use a distant DC.",
+   "causes": [
+    "Missing subnet definitions in AD Sites and Services"
+   ],
+   "fix": [
+    "Add the subnets from netlogon.log to AD Sites and Services"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "id": 1129,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Group Policy failed: no DC connection",
+   "what": "Group Policy processing failed because the network/DC was not reachable.",
+   "causes": [
+    "Network not ready at boot",
+    "VPN not connected",
+    "DNS problems"
+   ],
+   "fix": [
+    "Harmless once at boot; gpupdate /force later should succeed"
+   ],
+   "related": [
+    5719
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "id": 1085,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Group Policy extension failed",
+   "what": "A Group Policy client-side extension (e.g. Drive Maps, Registry, Scheduled Tasks) failed to apply settings.",
+   "causes": [
+    "Wrong settings in a GPO",
+    "Item-level targeting or permissions problem"
+   ],
+   "fix": [
+    "Run gpresult /h report.html and check the named extension"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "id": 1096,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Group Policy could not read registry.pol",
+   "what": "A Group Policy registry file is corrupted.",
+   "causes": [
+    "Corrupted local registry.pol"
+   ],
+   "fix": [
+    "Delete C:\\Windows\\System32\\GroupPolicy\\Machine\\registry.pol and run gpupdate /force"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "id": 1058,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Group Policy could not read gpt.ini",
+   "what": "The computer could not read a GPO file from SYSVOL.",
+   "causes": [
+    "SYSVOL/DFS-R replication issue",
+    "DNS or network problem"
+   ],
+   "fix": [
+    "Check access to \\\\domain\\SYSVOL",
+    "Check SYSVOL replication on the domain controllers"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "id": 1053,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Group Policy could not resolve the user name",
+   "what": "Group Policy failed to identify the user or computer in the domain.",
+   "causes": [
+    "DC or DNS unreachable"
+   ],
+   "fix": [
+    "Check connectivity to the domain"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "id": 1030,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Group Policy query failed",
+   "what": "Querying the list of Group Policy objects failed.",
+   "causes": [
+    "DC unreachable"
+   ],
+   "fix": [
+    "Check connectivity to the domain"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "id": 1500,
+   "class": "harmless",
+   "category": "Domain",
+   "title": "Group Policy applied",
+   "what": "Group Policy settings were processed successfully.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-GroupPolicy",
+   "ids": [
+    1501,
+    1502,
+    1503
+   ],
+   "class": "harmless",
+   "category": "Domain",
+   "title": "Group Policy applied",
+   "what": "Group Policy settings were processed successfully.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Security-Kerberos",
+   "id": 4,
+   "class": "attention",
+   "category": "Domain",
+   "title": "Kerberos ticket error (wrong account for SPN)",
+   "what": "A Kerberos ticket was encrypted for a different account than expected - usually a duplicate or misplaced SPN.",
+   "causes": [
+    "Duplicate Service Principal Name",
+    "Service running under a different account",
+    "DNS pointing a name to the wrong server"
+   ],
+   "fix": [
+    "Find duplicates: setspn -X",
+    "Check the DNS record for the server name in the message"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Kerberos-Key-Distribution-Center",
+   "id": 14,
+   "class": "attention",
+   "category": "Domain",
+   "title": "KDC: no suitable key for encryption type",
+   "what": "The domain controller could not issue a ticket because no key with a supported encryption type exists for the account.",
+   "causes": [
+    "Old account password set before AES was enabled",
+    "RC4 disabled while accounts only have RC4 keys"
+   ],
+   "fix": [
+    "Reset the account's password",
+    "Review allowed Kerberos encryption types"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Kerberos-Key-Distribution-Center",
+   "id": 16,
+   "class": "attention",
+   "category": "Domain",
+   "title": "KDC: encryption type not supported",
+   "what": "A ticket request used an encryption type the account does not support.",
+   "causes": [
+    "Encryption type mismatch"
+   ],
+   "fix": [
+    "Review msDS-SupportedEncryptionTypes and policy"
+   ]
+  },
+  {
+   "provider": "Schannel",
+   "id": 36870,
+   "class": "attention",
+   "category": "Security",
+   "title": "TLS: cannot access the certificate's private key",
+   "what": "Schannel could not use the private key of a TLS server certificate. TLS connections to this machine may fail.",
+   "causes": [
+    "Missing permissions on the MachineKeys folder",
+    "Certificate imported without its private key",
+    "Expired/renewed certificate"
+   ],
+   "fix": [
+    "Check the certificate in certlm.msc has a private key",
+    "Check permissions on C:\\ProgramData\\Microsoft\\Crypto\\RSA\\MachineKeys"
+   ]
+  },
+  {
+   "provider": "Schannel",
+   "id": 36874,
+   "class": "attention",
+   "category": "Security",
+   "title": "TLS: no common cipher suite",
+   "what": "A client tried to connect over TLS but none of its cipher suites are supported by this server.",
+   "causes": [
+    "Old client using deprecated TLS/ciphers",
+    "Over-hardened server"
+   ],
+   "fix": [
+    "Identify the client; update it, or review enabled cipher suites"
+   ]
+  },
+  {
+   "provider": "Schannel",
+   "id": 36887,
+   "class": "harmless",
+   "category": "Security",
+   "title": "TLS: fatal alert received",
+   "what": "The remote side ended a TLS connection with an alert. Very common and usually harmless (closed tabs, scanners, cert checks).",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Schannel",
+   "id": 36888,
+   "class": "harmless",
+   "category": "Security",
+   "title": "TLS: fatal alert generated",
+   "what": "This machine ended a TLS connection with an alert. Very common and usually harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Schannel",
+   "id": 36871,
+   "class": "attention",
+   "category": "Security",
+   "title": "TLS: fatal error creating credentials",
+   "what": "Schannel could not create TLS client/server credentials.",
+   "causes": [
+    "Certificate or private key problem",
+    "Disabled protocols"
+   ],
+   "fix": [
+    "Check machine certificates and TLS protocol settings"
+   ]
+  },
+  {
+   "provider": "TermDD",
+   "id": 56,
+   "class": "info",
+   "category": "Remote Desktop",
+   "title": "RDP protocol error from a client",
+   "what": "The Remote Desktop server got an invalid packet from a client. Often internet scanners probing port 3389.",
+   "causes": [
+    "Port scanners",
+    "Incompatible or old RDP client",
+    "Network problems"
+   ],
+   "fix": [
+    "If RDP is exposed to the internet, put it behind a VPN or RD Gateway"
+   ]
+  },
+  {
+   "provider": "TermDD",
+   "id": 50,
+   "class": "info",
+   "category": "Remote Desktop",
+   "title": "RDP protocol error (X.224)",
+   "what": "An RDP connection had a protocol error. Often scanners or interrupted connections.",
+   "causes": [
+    "Scanners",
+    "Network drops"
+   ],
+   "fix": [
+    "If RDP is exposed to the internet, restrict it"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-TerminalServices-RemoteConnectionManager",
+   "id": 1149,
+   "class": "info",
+   "category": "Remote Desktop",
+   "title": "RDP user authenticated (network level)",
+   "summary": "RDP connection authenticated: {0} from {2}",
+   "what": "A user passed network-level authentication for Remote Desktop. The message shows the user and source address.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+   "id": 21,
+   "class": "info",
+   "category": "Remote Desktop",
+   "title": "Session logon succeeded",
+   "what": "A user logged on to a session (local or Remote Desktop). The message shows user and source address.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+   "id": 23,
+   "class": "info",
+   "category": "Remote Desktop",
+   "title": "Session logoff",
+   "what": "A user logged off from a session.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+   "id": 24,
+   "class": "info",
+   "category": "Remote Desktop",
+   "title": "Session disconnected",
+   "what": "A session was disconnected (user closed RDP window or lost connection).",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-TerminalServices-LocalSessionManager",
+   "id": 25,
+   "class": "info",
+   "category": "Remote Desktop",
+   "title": "Session reconnected",
+   "what": "A user reconnected to an existing session.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-WLAN-AutoConfig",
+   "id": 8001,
+   "class": "info",
+   "category": "Network",
+   "title": "Connected to Wi-Fi",
+   "what": "The computer connected to a wireless network.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-WLAN-AutoConfig",
+   "id": 8003,
+   "class": "info",
+   "category": "Network",
+   "title": "Disconnected from Wi-Fi",
+   "what": "The computer disconnected from a wireless network. The message gives the reason.",
+   "causes": [
+    "Weak signal",
+    "Router restart",
+    "Driver/power saving"
+   ],
+   "fix": [
+    "If frequent: update the Wi-Fi driver; disable adapter power saving"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-WLAN-AutoConfig",
+   "id": 8002,
+   "class": "attention",
+   "category": "Network",
+   "title": "Wi-Fi connection failed",
+   "what": "Connecting to a wireless network failed. The message gives the reason.",
+   "causes": [
+    "Wrong password",
+    "Weak signal",
+    "Authentication/certificate problems"
+   ],
+   "fix": [
+    "Read the failure reason in the message"
+   ]
+  }
+ ]
+}

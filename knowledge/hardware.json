@@ -1,0 +1,253 @@
+{
+ "entries": [
+  {
+   "provider": "Microsoft-Windows-WHEA-Logger",
+   "id": 1,
+   "class": "critical",
+   "category": "Hardware",
+   "title": "Fatal hardware error (reported after restart)",
+   "what": "The system crashed because of a hardware error; this record was written after the restart.",
+   "causes": [
+    "CPU, RAM or motherboard fault",
+    "Overheating",
+    "Unstable overclock or undervolt",
+    "Power supply problems"
+   ],
+   "fix": [
+    "Remove overclock/XMP/undervolt",
+    "Check temperatures",
+    "Test RAM",
+    "Update BIOS"
+   ],
+   "related": [
+    18,
+    41
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-WHEA-Logger",
+   "id": 17,
+   "class": "attention",
+   "category": "Hardware",
+   "title": "Corrected PCI Express error",
+   "what": "A PCIe device or link had an error that was corrected. Frequent ones point to a flaky link.",
+   "causes": [
+    "PCIe power saving (ASPM) on some boards/GPUs/NVMe",
+    "Poorly seated card or SSD",
+    "Riser cable",
+    "Outdated BIOS/chipset driver"
+   ],
+   "fix": [
+    "Update BIOS and chipset drivers",
+    "Reseat the device named in the message",
+    "Try disabling PCIe Link State Power Management"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-WHEA-Logger",
+   "id": 18,
+   "class": "critical",
+   "category": "Hardware",
+   "title": "Fatal hardware error (machine check)",
+   "what": "The CPU reported a fatal machine check error. The system crashed.",
+   "causes": [
+    "Unstable CPU overclock/undervolt",
+    "Overheating",
+    "Faulty CPU, RAM or motherboard",
+    "Insufficient power"
+   ],
+   "fix": [
+    "Reset BIOS to defaults (disable overclock/XMP)",
+    "Check CPU temperature and cooling",
+    "Update BIOS",
+    "Test RAM"
+   ],
+   "related": [
+    1,
+    19
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-WHEA-Logger",
+   "id": 19,
+   "class": "attention",
+   "category": "Hardware",
+   "title": "Corrected hardware error (CPU)",
+   "what": "The CPU detected and corrected an internal error (cache, bus). Occasional is tolerable; frequent means instability.",
+   "causes": [
+    "Unstable overclock/undervolt",
+    "Heat",
+    "Aging hardware"
+   ],
+   "fix": [
+    "Remove overclock, check temperatures, update BIOS"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-WHEA-Logger",
+   "id": 47,
+   "class": "attention",
+   "category": "Hardware",
+   "title": "Corrected memory error",
+   "what": "A RAM error was detected and corrected (ECC). Repeated errors indicate a failing memory module.",
+   "causes": [
+    "Failing RAM module",
+    "Unstable memory overclock"
+   ],
+   "fix": [
+    "Identify the module from the message; test or replace it"
+   ]
+  },
+  {
+   "provider": "Display",
+   "id": 4101,
+   "class": "attention",
+   "category": "Hardware",
+   "title": "Graphics driver stopped responding and recovered",
+   "summary": "Graphics driver {0} stopped responding and recovered",
+   "what": "The graphics driver hung; Windows reset it (TDR). The screen may have gone black for a moment.",
+   "causes": [
+    "Outdated or buggy GPU driver",
+    "GPU overheating or overclock",
+    "Insufficient power to the GPU"
+   ],
+   "fix": [
+    "Clean-install the latest GPU driver (or a previous stable one)",
+    "Check GPU temperature; remove overclock",
+    "Check PSU and GPU power cables"
+   ]
+  },
+  {
+   "provider": "nvlddmkm",
+   "ids": [
+    13,
+    14,
+    153
+   ],
+   "class": "attention",
+   "category": "Hardware",
+   "title": "NVIDIA driver error",
+   "what": "The NVIDIA graphics driver reported an error or timeout (the GPU may have reset).",
+   "causes": [
+    "Driver bug",
+    "GPU overclock or overheating",
+    "Power delivery to the GPU"
+   ],
+   "fix": [
+    "Clean-install the NVIDIA driver (DDU, then latest stable)",
+    "Remove overclock; check temperatures and power cables"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Kernel-PnP",
+   "id": 219,
+   "class": "harmless",
+   "category": "Hardware",
+   "title": "Driver failed to load for a device",
+   "summary": "Driver {1} failed to load for a device",
+   "what": "A driver could not be loaded for a device at boot. Very often a virtual/user-mode driver (e.g. WUDFRd) that loads fine later - usually harmless.",
+   "causes": [
+    "Device enumerated before its driver was ready",
+    "Missing driver for a device"
+   ],
+   "fix": [
+    "Harmless if all devices work; otherwise check Device Manager for a yellow warning"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Kernel-PnP",
+   "id": 225,
+   "class": "info",
+   "category": "Hardware",
+   "title": "Application blocked device removal",
+   "what": "A program kept a device busy when it was being removed or ejected.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Kernel-PnP",
+   "id": 400,
+   "class": "harmless",
+   "category": "Hardware",
+   "title": "Device configured",
+   "what": "A device was configured with a driver. Normal at boot and when plugging in devices.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Kernel-PnP",
+   "id": 410,
+   "class": "harmless",
+   "category": "Hardware",
+   "title": "Device started",
+   "what": "A device driver started. Normal.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Kernel-PnP",
+   "id": 411,
+   "class": "attention",
+   "category": "Hardware",
+   "title": "Device had a problem starting",
+   "what": "A device could not start. The message names the device and problem code.",
+   "causes": [
+    "Missing or wrong driver",
+    "Faulty device"
+   ],
+   "fix": [
+    "Check Device Manager; reinstall or update the driver"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Resource-Exhaustion-Detector",
+   "id": 2004,
+   "class": "critical",
+   "category": "System",
+   "title": "Low virtual memory",
+   "what": "Windows was running out of memory. The message lists the programs using the most memory.",
+   "causes": [
+    "A program with a memory leak",
+    "Page file disabled or too small",
+    "Not enough RAM for the workload"
+   ],
+   "fix": [
+    "Find the top consumer in the message and update/restart it",
+    "Set the page file to System managed",
+    "Add RAM if it happens under normal load"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-TPM-WMI",
+   "id": 1796,
+   "class": "attention",
+   "category": "Security",
+   "title": "Secure Boot certificate update failed",
+   "what": "Windows could not update the Secure Boot database (DB/DBX) on this device.",
+   "causes": [
+    "Firmware does not accept the update",
+    "Secure Boot disabled",
+    "Outdated BIOS"
+   ],
+   "fix": [
+    "Update BIOS/UEFI firmware",
+    "Check Secure Boot status in msinfo32"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-TPM-WMI",
+   "id": 1801,
+   "class": "attention",
+   "category": "Security",
+   "title": "Secure Boot certificates need updating",
+   "what": "The device's Secure Boot certificates have been flagged for update but not yet applied.",
+   "causes": [
+    "Firmware update pending",
+    "Microsoft Secure Boot certificate rollover"
+   ],
+   "fix": [
+    "Install the latest Windows updates and BIOS/UEFI firmware"
+   ]
+  }
+ ]
+}

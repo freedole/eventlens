@@ -1,0 +1,310 @@
+{
+ "entries": [
+  {
+   "provider": "Microsoft-Windows-DistributedCOM",
+   "id": 10016,
+   "class": "harmless",
+   "category": "System",
+   "title": "DCOM permission warning (harmless)",
+   "what": "A Windows component tried to start a COM server without the matching permission. Microsoft documents these as expected and safe to ignore; changing the permissions can break things.",
+   "causes": [
+    "By design in Windows"
+   ],
+   "fix": [
+    "Safe to ignore - do not change DCOM permissions"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-DistributedCOM",
+   "id": 10010,
+   "class": "harmless",
+   "category": "System",
+   "title": "COM server did not register in time",
+   "what": "A COM server did not register with DCOM within the timeout. Usually a background app that was slow to start; harmless if nothing is broken.",
+   "causes": [
+    "Slow startup of a background app"
+   ],
+   "fix": [
+    "Safe to ignore unless a specific feature fails"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-DistributedCOM",
+   "id": 10005,
+   "class": "harmless",
+   "category": "System",
+   "title": "DCOM could not start a disabled service",
+   "what": "DCOM tried to start a service that is disabled. Harmless if you disabled that service on purpose.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-DistributedCOM",
+   "id": 10028,
+   "class": "attention",
+   "category": "Network",
+   "title": "DCOM could not reach a computer",
+   "what": "DCOM could not communicate with another computer (often a monitoring or management tool polling an offline PC).",
+   "causes": [
+    "Remote computer offline",
+    "Firewall blocking RPC"
+   ],
+   "fix": [
+    "Harmless if the named computer is gone; otherwise check its connectivity"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-WMI",
+   "id": 10,
+   "class": "harmless",
+   "category": "System",
+   "title": "WMI event filter could not be reactivated",
+   "what": "A WMI event filter query failed at startup (classic leftover of an old component). Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Perflib",
+   "id": 1008,
+   "class": "harmless",
+   "category": "System",
+   "title": "Performance counter could not be opened",
+   "what": "A performance counter DLL failed to open. Affects only monitoring tools; harmless.",
+   "causes": [],
+   "fix": [
+    "If performance counters are needed: lodctr /R (as administrator)"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Perflib",
+   "id": 1023,
+   "class": "harmless",
+   "category": "System",
+   "title": "Performance counter DLL could not be loaded",
+   "what": "An extensible performance counter could not be loaded. Affects only monitoring tools; harmless.",
+   "causes": [],
+   "fix": [
+    "If needed: lodctr /R (as administrator)"
+   ]
+  },
+  {
+   "provider": "Perflib",
+   "ids": [
+    1008,
+    1023,
+    2003
+   ],
+   "class": "harmless",
+   "category": "System",
+   "title": "Performance counter problem (harmless)",
+   "what": "A performance counter could not be opened or loaded. Affects only monitoring tools.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Kernel-EventTracing",
+   "ids": [
+    2,
+    3
+   ],
+   "class": "harmless",
+   "category": "System",
+   "title": "Trace session error (harmless)",
+   "what": "A diagnostic trace session (e.g. ReadyBoot, Circular Kernel Context Logger) stopped or could not start. Developer diagnostics only.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-User Device Registration",
+   "ids": [
+    304,
+    307,
+    360
+   ],
+   "class": "harmless",
+   "category": "System",
+   "title": "Device registration with Azure AD skipped",
+   "what": "Windows checked whether to register the device with Azure AD / Entra ID. Harmless on PCs that are not Entra-joined.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "ESENT",
+   "ids": [
+    455,
+    489,
+    490
+   ],
+   "class": "harmless",
+   "category": "System",
+   "title": "Database file access error (usually harmless)",
+   "what": "A Windows internal database (often the usage monitor SRUM or the Windows Search/Store cache) could not open a log file. Common on desktops and usually harmless.",
+   "causes": [
+    "Missing folder for a system database log"
+   ],
+   "fix": [
+    "Usually ignore; if repeated every minute, recreating the missing folder named in the message stops it"
+   ]
+  },
+  {
+   "provider": "ESENT",
+   "ids": [
+    102,
+    103,
+    105,
+    300,
+    301,
+    302,
+    326,
+    327,
+    916
+   ],
+   "class": "harmless",
+   "category": "System",
+   "title": "Internal database started/stopped",
+   "what": "A Windows internal database engine instance started, stopped or replayed logs. Routine.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-CAPI2",
+   "id": 513,
+   "class": "harmless",
+   "category": "System",
+   "title": "Cryptographic Services: VSS writer permission note",
+   "what": "Cryptographic Services hit an access-denied while preparing a backup snapshot. Known and harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-CAPI2",
+   "id": 4107,
+   "class": "harmless",
+   "category": "System",
+   "title": "Could not extract third-party root list",
+   "what": "Windows could not process the downloaded trusted root certificate list (often offline or blocked). Usually harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "VDS Basic Provider",
+   "id": 1,
+   "class": "harmless",
+   "category": "Storage",
+   "title": "VDS: unexpected failure (harmless)",
+   "what": "The Virtual Disk Service basic provider logged an error, often for card readers or empty removable drives. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Bits-Client",
+   "ids": [
+    3,
+    4,
+    59,
+    60
+   ],
+   "class": "harmless",
+   "category": "Update",
+   "title": "Background transfer (BITS) job",
+   "what": "A background download job was created, finished or transferred data. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Time-Service",
+   "id": 158,
+   "class": "harmless",
+   "category": "Network",
+   "title": "Time provider is a VM integration service",
+   "what": "The clock is synchronized from the virtualization host. Normal in virtual machines.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-FilterManager",
+   "id": 6,
+   "class": "harmless",
+   "category": "System",
+   "title": "File system filter loaded",
+   "what": "A file system filter driver (antivirus, backup, sync tool) loaded. Normal at boot.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-UserModePowerService",
+   "id": 12,
+   "class": "harmless",
+   "category": "Power",
+   "title": "Power plan changed",
+   "what": "The active power plan or power mode changed. Normal.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-DeviceSetupManager",
+   "ids": [
+    131
+   ],
+   "class": "harmless",
+   "category": "Hardware",
+   "title": "Device metadata/driver retrieval note",
+   "what": "Device Setup Manager could not get metadata or a driver from the internet for a device. Normal when offline or for generic devices.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "edgeupdate",
+   "id": 0,
+   "class": "harmless",
+   "category": "Software",
+   "title": "Microsoft Edge updater status",
+   "what": "Microsoft Edge update service status record. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "gupdate",
+   "id": 0,
+   "class": "harmless",
+   "category": "Software",
+   "title": "Google updater status",
+   "what": "Google update service status record. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "LoadPerf",
+   "ids": [
+    1000,
+    1001
+   ],
+   "class": "harmless",
+   "category": "System",
+   "title": "Performance counters loaded/unloaded",
+   "what": "Performance counters were registered or removed (usually during installs/updates). Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Winlogon",
+   "id": 4101,
+   "class": "harmless",
+   "category": "Logon",
+   "title": "Windows license validated",
+   "what": "Windows license was validated at logon. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-WinRM",
+   "id": 10149,
+   "class": "harmless",
+   "category": "System",
+   "title": "WinRM not listening",
+   "what": "Windows Remote Management is not configured to accept requests. Normal unless you use remote PowerShell.",
+   "causes": [],
+   "fix": []
+  }
+ ]
+}

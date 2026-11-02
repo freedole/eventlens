@@ -9,11 +9,11 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>EventLens</RootNamespace>
     <AssemblyName>EventLens</AssemblyName>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Product>EventLens</Product>
     <Company>freedole</Company>
     <Authors>Đorđe Kaurinović</Authors>
-    <Description>Readable Windows Event Log - explains what happened and why.</Description>
+    <Description>EventLens - the Event Viewer++ that explains itself.</Description>
     <Copyright>© 2026 Đorđe Kaurinović</Copyright>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
@@ -25,11 +25,13 @@
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="10.*" />
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.*" />
+    <PackageReference Include="Microsoft.Data.Sqlite" Version="10.*" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Assets\eventlens.ico" />
     <Resource Include="Assets\eventlens-32.png" />
+    <EmbeddedResource Include="..\..\knowledge\*.json" LogicalName="kb.%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

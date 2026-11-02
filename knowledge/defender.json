@@ -1,0 +1,354 @@
+{
+ "entries": [
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1000,
+   "class": "harmless",
+   "category": "Antivirus",
+   "title": "Antivirus scan started",
+   "what": "A Microsoft Defender scan started.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1001,
+   "class": "harmless",
+   "category": "Antivirus",
+   "title": "Antivirus scan finished",
+   "what": "A Microsoft Defender scan finished.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1002,
+   "class": "info",
+   "category": "Antivirus",
+   "title": "Antivirus scan stopped",
+   "what": "A scan was stopped before it finished.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1005,
+   "class": "attention",
+   "category": "Antivirus",
+   "title": "Antivirus scan failed",
+   "what": "A Microsoft Defender scan failed. The message contains the error.",
+   "causes": [
+    "Engine or definition problem"
+   ],
+   "fix": [
+    "Update definitions and run the scan again"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1006,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Malware or unwanted software found",
+   "what": "Microsoft Defender found malware or potentially unwanted software. The message names the threat and file.",
+   "causes": [
+    "Downloaded or received infected file",
+    "USB drive",
+    "Potentially unwanted app bundled with an installer"
+   ],
+   "fix": [
+    "Open Windows Security > Protection history and check the action taken",
+    "Run a full scan",
+    "If it keeps coming back, find how it gets in (startup items, scheduled tasks, browser extensions)"
+   ],
+   "related": [
+    1007,
+    1116,
+    1117
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1007,
+   "class": "info",
+   "category": "Antivirus",
+   "title": "Action taken against malware",
+   "what": "Microsoft Defender quarantined, removed or allowed a detected item.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1008,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Action against malware failed",
+   "what": "Microsoft Defender could not remove or quarantine a threat.",
+   "causes": [
+    "File in use",
+    "Insufficient rights"
+   ],
+   "fix": [
+    "Run Microsoft Defender Offline scan from Windows Security"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1116,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Threat detected",
+   "summary": "Threat detected: {7}",
+   "what": "Microsoft Defender detected malware or potentially unwanted software.",
+   "causes": [
+    "Infected download, email attachment or USB drive",
+    "Potentially unwanted app"
+   ],
+   "fix": [
+    "Check Windows Security > Protection history",
+    "Run a full scan",
+    "Change passwords if the threat was a password stealer"
+   ],
+   "related": [
+    1117,
+    1118
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1117,
+   "class": "info",
+   "category": "Antivirus",
+   "title": "Action taken against threat",
+   "summary": "Action taken against {7}",
+   "what": "Microsoft Defender acted against a detected threat (quarantine, remove, allow).",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1118,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Action against threat failed (non-critical)",
+   "what": "Microsoft Defender could not act against a threat.",
+   "causes": [],
+   "fix": [
+    "Run Microsoft Defender Offline scan"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1119,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Critical error acting against threat",
+   "what": "Microsoft Defender hit a critical error while acting against a threat.",
+   "causes": [],
+   "fix": [
+    "Run Microsoft Defender Offline scan",
+    "Consider a second-opinion scanner"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1150,
+   "class": "harmless",
+   "category": "Antivirus",
+   "title": "Defender is healthy",
+   "what": "Periodic heartbeat: Microsoft Defender is running and healthy.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1151,
+   "class": "harmless",
+   "category": "Antivirus",
+   "title": "Defender health report",
+   "what": "Periodic health report from Microsoft Defender.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 2000,
+   "class": "harmless",
+   "category": "Antivirus",
+   "title": "Antivirus definitions updated",
+   "what": "Microsoft Defender security intelligence was updated.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 2001,
+   "class": "attention",
+   "category": "Antivirus",
+   "title": "Antivirus definitions update failed",
+   "what": "Microsoft Defender could not update its definitions.",
+   "causes": [
+    "No internet",
+    "Proxy/firewall",
+    "Windows Update problems"
+   ],
+   "fix": [
+    "Update manually from Windows Security",
+    "Check connectivity to Microsoft update servers"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 2010,
+   "class": "harmless",
+   "category": "Antivirus",
+   "title": "Dynamic signature used",
+   "what": "Defender used a cloud-delivered (dynamic) signature. Normal.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 3002,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Real-time protection failed",
+   "what": "A real-time protection feature of Microsoft Defender failed.",
+   "causes": [
+    "Conflict with other security software",
+    "Corrupted installation"
+   ],
+   "fix": [
+    "Restart; update Windows",
+    "Check for other antivirus products installed"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 5001,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Real-time protection turned off",
+   "what": "Microsoft Defender real-time protection was disabled.",
+   "causes": [
+    "User or policy turned it off",
+    "Another antivirus took over (normal)",
+    "Malware disabling protection"
+   ],
+   "fix": [
+    "If no other antivirus is installed, turn real-time protection back on and investigate why it was disabled"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 5004,
+   "class": "info",
+   "category": "Antivirus",
+   "title": "Real-time protection configuration changed",
+   "what": "A real-time protection setting changed.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 5007,
+   "class": "info",
+   "category": "Antivirus",
+   "title": "Defender configuration changed",
+   "what": "A Microsoft Defender setting changed. Exclusions added here are worth a look.",
+   "causes": [],
+   "fix": [
+    "Review new exclusions"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 5010,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Scanning for malware disabled",
+   "what": "Scanning for malware and unwanted software was disabled.",
+   "causes": [
+    "Policy",
+    "Malware"
+   ],
+   "fix": [
+    "Re-enable and investigate"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 5012,
+   "class": "critical",
+   "category": "Antivirus",
+   "title": "Virus scanning disabled",
+   "what": "Scanning for viruses was disabled.",
+   "causes": [
+    "Policy",
+    "Malware"
+   ],
+   "fix": [
+    "Re-enable and investigate"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 5013,
+   "class": "attention",
+   "category": "Antivirus",
+   "title": "Tamper protection blocked a change",
+   "what": "Tamper protection stopped a change to Microsoft Defender settings. Something tried to weaken protection.",
+   "causes": [
+    "Software trying to change Defender settings",
+    "Malware"
+   ],
+   "fix": [
+    "Identify the program that tried to change settings"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1121,
+   "class": "attention",
+   "category": "Antivirus",
+   "title": "Attack surface reduction rule blocked something",
+   "what": "An attack surface reduction (ASR) rule blocked an action.",
+   "causes": [],
+   "fix": [
+    "Review the blocked program; add exclusion only if it is legitimate"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Windows Defender",
+   "id": 1123,
+   "class": "attention",
+   "category": "Antivirus",
+   "title": "Controlled folder access blocked an app",
+   "what": "An app was blocked from changing files in protected folders (ransomware protection).",
+   "causes": [],
+   "fix": [
+    "Allow the app in Windows Security only if you trust it"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Security-Center",
+   "id": 1,
+   "class": "harmless",
+   "category": "Antivirus",
+   "title": "Security Center service started",
+   "what": "The Windows Security Center service started.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Security-Center",
+   "id": 15,
+   "class": "info",
+   "category": "Antivirus",
+   "title": "Antivirus status updated",
+   "what": "Security Center recorded the status of an antivirus product (e.g. enabled).",
+   "causes": [],
+   "fix": []
+  }
+ ]
+}

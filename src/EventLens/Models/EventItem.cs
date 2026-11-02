@@ -1,4 +1,5 @@
 using System.Text;
+using EventLens.Core.Knowledge;
 
 namespace EventLens.Models;
 
@@ -25,9 +26,20 @@ public sealed class EventItem
     public IReadOnlyList<string> Data { get; init; } = [];
     public Explanation? Explanation { get; init; }
 
-    public string SeverityText => Severity.ToString();
-    public string Summary => Explanation?.Title ?? FirstLine(Message);
-    public bool HasExplanation => Explanation is not null;
+    /// <summary>Set by the app when the user marked this event type as harmless.</summary>
+    public bool UserMuted { get; set; }
+
+    public string SeverityText => IsHarmless ? "Harmless" : Severity.ToString();
+    public bool HasExplanation => !string.IsNullOrEmpty(Explanation?.Title);
+    public bool IsHarmless => UserMuted || Explanation?.IsHarmless == true;
+    /// <summary>Errors/criticals/warnings that actually matter (used by counters and the health score).</summary>
+    public bool IsProblem => !IsHarmless && Severity <= Severity.Warning;
+
+    public string Summary =>
+        HasExplanation ? Explanation!.DisplayTitle : FirstLine(Message);
+
+    /// <summary>Same type of event regardless of log: provider + ID.</summary>
+    public string TypeKey => $"{Provider}|{Id}";
     public string GroupKey => $"{LogName}|{Provider}|{Id}";
 
     public string ToClipboardText()
@@ -35,11 +47,13 @@ public sealed class EventItem
         var sb = new StringBuilder();
         sb.AppendLine($"{TimeCreated:yyyy-MM-dd HH:mm:ss}  {Severity}  {LogName} / {Provider}  ID {Id}");
         if (!string.IsNullOrEmpty(MachineName)) sb.AppendLine($"Computer: {MachineName}");
-        if (Explanation is not null)
+        if (HasExplanation)
         {
-            sb.AppendLine($"Meaning: {Explanation.Title} - {Explanation.What}");
-            sb.AppendLine($"What to do: {Explanation.Action}");
+            sb.AppendLine($"Meaning: {Explanation!.DisplayTitle} - {Explanation.What}");
+            if (Explanation.HasFix) sb.AppendLine("What to do: " + string.Join(" ", Explanation.Fix));
         }
+        foreach (var c in Explanation?.Codes ?? [])
+            sb.AppendLine($"{c.Code}: {c.Meaning}");
         sb.AppendLine();
         sb.AppendLine(Message);
         return sb.ToString();
@@ -52,8 +66,6 @@ public sealed class EventItem
         return line.Length > 160 ? line[..160] + "…" : line;
     }
 }
-
-public sealed record Explanation(string Title, string What, string Action, string Category);
 
 /// <summary>One row in the Events list: a single event or a group of identical repeats.</summary>
 public sealed class EventRow
@@ -75,6 +87,7 @@ public sealed class EventRow
     public int Id => First.Id;
     public Severity Severity => First.Severity;
     public string SeverityText => First.SeverityText;
+    public bool IsHarmless => First.IsHarmless;
     public string Provider => First.Provider;
     public string Summary => First.Summary;
 }

@@ -1,0 +1,16 @@
+{
+ "version": 2026110201,
+ "updated": "2026-11-02",
+ "files": [
+  "apps.json",
+  "defender.json",
+  "hardware.json",
+  "network.json",
+  "noise.json",
+  "power.json",
+  "security.json",
+  "services.json",
+  "storage.json",
+  "updates.json"
+ ]
+}

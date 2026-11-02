@@ -28,6 +28,45 @@
                 <ui:Button Content="Restart as administrator" Command="{Binding RestartAsAdminCommand}" />
             </ui:CardControl>
 
+            <!-- Knowledge base -->
+            <TextBlock Text="Knowledge base" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,4" />
+            <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                       Text="Explanations work fully offline. Optionally, EventLens downloads a newer knowledge base from GitHub (once a day) - no data about your PC is sent." />
+            <ui:CardControl Margin="0,0,0,6">
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="BookInformation24" />
+                </ui:CardControl.Icon>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Update knowledge base automatically" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding KnowledgeInfo}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding KbStatus}" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Content="Check now" Command="{Binding SyncKbCommand}" Margin="0,0,12,0" />
+                    <ui:ToggleSwitch IsChecked="{Binding KbAutoUpdate}" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- App updates -->
+            <ui:CardControl Margin="0,0,0,6">
+                <ui:CardControl.Icon>
+                    <ui:SymbolIcon Symbol="ArrowDownload24" />
+                </ui:CardControl.Icon>
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Tell me when a new version is available" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding UpdateStatus}" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <CheckBox Content="Include alpha/beta versions" IsChecked="{Binding IncludePrereleases}" Margin="0,4,0,0" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Content="Check now" Command="{Binding CheckUpdateCommand}" Margin="0,0,12,0" />
+                    <ui:ToggleSwitch IsChecked="{Binding CheckForUpdates}" />
+                </StackPanel>
+            </ui:CardControl>
+
             <!-- AI -->
             <TextBlock Text="AI assistant" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,4" />
             <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
@@ -90,6 +129,28 @@
                 </Grid>
             </Border>
 
+            <!-- Privacy & support -->
+            <TextBlock Text="Privacy &amp; support" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,8" />
+            <ui:Card Margin="0,0,0,6">
+                <StackPanel>
+                    <TextBlock TextWrapping="Wrap" Text="Everything EventLens reads stays on this PC. Event text leaves your computer only when you press Ask AI, and only to the AI service you chose - you can always see exactly what is sent. History, notes and saved AI answers are stored locally in your profile." />
+                    <WrapPanel Margin="0,12,0,0">
+                        <ui:Button Content="Report an issue" Command="{Binding ReportIssueCommand}" Margin="0,0,8,6">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="Bug24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:Button Content="Open crash logs" Command="{Binding OpenLogsCommand}" Margin="0,0,8,6">
+                            <ui:Button.Icon>
+                                <ui:SymbolIcon Symbol="Folder24" />
+                            </ui:Button.Icon>
+                        </ui:Button>
+                        <ui:Button Content="Open data folder" Command="{Binding OpenDataFolderCommand}" Margin="0,0,8,6" />
+                        <ui:Button Content="Clear saved AI answers" Command="{Binding ClearAiCacheCommand}" Margin="0,0,8,6" />
+                    </WrapPanel>
+                </StackPanel>
+            </ui:Card>
+
             <!-- About -->
             <TextBlock Text="About" FontFamily="Segoe UI Variable Display, Segoe UI" FontSize="20" FontWeight="SemiBold" Margin="0,24,0,8" />
             <ui:Card>
@@ -97,7 +158,7 @@
                     <TextBlock FontSize="16" FontWeight="SemiBold">
                         <Run Text="EventLens " /><Run Text="{Binding Version, Mode=OneWay}" />
                     </TextBlock>
-                    <TextBlock Text="Readable Windows Event Log - what happened and why." Margin="0,4,0,0" />
+                    <TextBlock Text="The Event Viewer++ that explains itself." Margin="0,4,0,0" />
                     <TextBlock Text="{Binding KnowledgeInfo}" Margin="0,4,0,0"
                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                     <TextBlock Margin="0,8,0,0">

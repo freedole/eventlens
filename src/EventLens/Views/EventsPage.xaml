@@ -3,10 +3,11 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
       xmlns:conv="clr-namespace:EventLens.Converters"
+      xmlns:views="clr-namespace:EventLens.Views"
       x:Name="Root"
       Title="Events">
     <Page.Resources>
-        <conv:SeverityToBrushConverter x:Key="SevBrush" />
+        <conv:EventToBrushConverter x:Key="EvBrush" />
         <conv:NullToVisibilityConverter x:Key="NullToVis" />
         <conv:SymbolConverter x:Key="Sym" />
         <FontFamily x:Key="Display">Segoe UI Variable Display, Segoe UI</FontFamily>
@@ -25,23 +26,68 @@
         <!-- header -->
         <Grid Margin="0,0,0,14">
             <TextBlock Text="Events" FontFamily="{StaticResource Display}" FontSize="28" FontWeight="SemiBold" />
-            <Border HorizontalAlignment="Right" VerticalAlignment="Center" CornerRadius="12" Padding="10,4"
-                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
-                    BorderBrush="{DynamicResource AccentFillColorDefaultBrush}" BorderThickness="1">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding SourceText}" Value="">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <StackPanel Orientation="Horizontal">
-                    <ui:SymbolIcon Symbol="Desktop24" FontSize="14" Margin="0,0,6,0" />
-                    <TextBlock Text="{Binding SourceText}" />
-                </StackPanel>
-            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Border CornerRadius="12" Padding="10,4" Margin="0,0,10,0"
+                        Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                        BorderBrush="{DynamicResource AccentFillColorDefaultBrush}" BorderThickness="1">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding SourceText}" Value="">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Orientation="Horizontal">
+                        <ui:SymbolIcon Symbol="Desktop24" FontSize="14" Margin="0,0,6,0" />
+                        <TextBlock Text="{Binding SourceText}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- saved views -->
+                <ComboBox x:Name="ViewsCombo" Width="170" Margin="0,0,6,0" ItemsSource="{Binding SavedViews}"
+                          SelectionChanged="OnViewSelected" ToolTip="Saved views">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid MinWidth="140">
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center" Margin="0,0,24,0" />
+                                <Button HorizontalAlignment="Right" Padding="4,0" Background="Transparent" BorderThickness="0" Cursor="Hand"
+                                        ToolTip="Delete this view" Content="✕" FontSize="11"
+                                        Command="{Binding DataContext.DeleteViewCommand, ElementName=Root}" CommandParameter="{Binding}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <ui:Button x:Name="SaveViewButton" Margin="0,0,6,0" Click="OnSaveViewClick" ToolTip="Save the current filters as a view">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="Save24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+                <Popup x:Name="SaveViewPopup" PlacementTarget="{Binding ElementName=SaveViewButton}" Placement="Bottom" StaysOpen="False" AllowsTransparency="True">
+                    <Border CornerRadius="8" Padding="12" Margin="0,4,0,0" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}"
+                            BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                        <StackPanel Width="240">
+                            <TextBlock Text="Save current filters as" Margin="0,0,0,6" FontWeight="SemiBold" />
+                            <ui:TextBox x:Name="ViewNameBox" PlaceholderText="e.g. Disk problems" KeyDown="OnViewNameKeyDown" />
+                            <ui:Button Content="Save view" Appearance="Primary" Margin="0,8,0,0" HorizontalAlignment="Right" Click="OnSaveViewConfirm" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
+
+                <!-- export -->
+                <ui:Button x:Name="ExportButton" Content="Export" Click="OnExportClick">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="ArrowExportLtr24" />
+                    </ui:Button.Icon>
+                    <ui:Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="CSV (Excel) - shown events" Command="{Binding ExportCsvCommand}" />
+                            <MenuItem Header="EVTX (Event Viewer) - current filter" Command="{Binding ExportEvtxCommand}" />
+                        </ContextMenu>
+                    </ui:Button.ContextMenu>
+                </ui:Button>
+            </StackPanel>
         </Grid>
 
         <!-- filters -->
@@ -53,20 +99,23 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <ComboBox ItemsSource="{Binding LogChoices}" DisplayMemberPath="Name" SelectedIndex="{Binding LogIndex}"
                       IsEnabled="{Binding IsNotFileSource}" Margin="0,0,8,0" ToolTip="Log" />
             <ComboBox Grid.Column="1" ItemsSource="{Binding Levels}" SelectedIndex="{Binding LevelIndex}" Margin="0,0,8,0" ToolTip="Level" />
             <ComboBox Grid.Column="2" ItemsSource="{Binding TimeWindows}" SelectedIndex="{Binding WindowIndex}" Margin="0,0,8,0" ToolTip="Time" />
-            <ui:TextBox Grid.Column="3" PlaceholderText="Search by ID, source or text…" Margin="0,0,12,0"
+            <ui:TextBox x:Name="SearchBox" Grid.Column="3" PlaceholderText="Search by ID, source or text… (Ctrl+F)" Margin="0,0,12,0"
                         Text="{Binding Search, UpdateSourceTrigger=PropertyChanged, Delay=250}">
                 <ui:TextBox.Icon>
                     <ui:SymbolIcon Symbol="Search24" />
                 </ui:TextBox.Icon>
             </ui:TextBox>
-            <ui:ToggleSwitch Grid.Column="4" Content="Group repeats" IsChecked="{Binding GroupRepeats}" Margin="0,0,12,0"
+            <ui:ToggleSwitch Grid.Column="4" Content="Group" IsChecked="{Binding GroupRepeats}" Margin="0,0,12,0"
                              ToolTip="Show identical events once with a count" />
-            <ui:Button Grid.Column="5" Appearance="Primary" Command="{Binding RefreshCommand}" ToolTip="Refresh">
+            <ui:ToggleSwitch Grid.Column="5" Content="Hide harmless" IsChecked="{Binding HideHarmless}" Margin="0,0,12,0"
+                             ToolTip="Hide events known to be harmless and those you marked as harmless" />
+            <ui:Button Grid.Column="6" Appearance="Primary" Command="{Binding RefreshCommand}" ToolTip="Refresh (F5)">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="ArrowClockwise24" />
                 </ui:Button.Icon>
@@ -101,7 +150,7 @@
                 <ui:SymbolIcon Symbol="Filter24" FontSize="14" Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
                 <TextBlock Text="{Binding FilterLabel}" Margin="8,0,12,0" VerticalAlignment="Center" FontWeight="SemiBold"
                            Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
-                <ui:Button Appearance="Transparent" Padding="4" Command="{Binding ClearFilterCommand}" ToolTip="Clear filter"
+                <ui:Button Appearance="Transparent" Padding="4" Command="{Binding ClearFilterCommand}" ToolTip="Clear filter (Esc)"
                            Foreground="{DynamicResource TextOnAccentFillColorPrimaryBrush}">
                     <ui:Button.Icon>
                         <ui:SymbolIcon Symbol="Dismiss16" />
@@ -113,9 +162,9 @@
         <!-- list + details -->
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MinWidth="440" />
+                <ColumnDefinition Width="*" MinWidth="420" />
                 <ColumnDefinition Width="14" />
-                <ColumnDefinition Width="420" />
+                <ColumnDefinition Width="430" />
             </Grid.ColumnDefinitions>
 
             <DataGrid x:Name="EventGrid" ItemsSource="{Binding View}" SelectedItem="{Binding Selected}"
@@ -123,30 +172,51 @@
                       HeadersVisibility="Column" GridLinesVisibility="None" RowHeight="38"
                       EnableRowVirtualization="True" EnableColumnVirtualization="True"
                       VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
-                      CanUserReorderColumns="False">
+                      CanUserReorderColumns="False" ClipboardCopyMode="None">
+                <DataGrid.ContextMenu>
+                    <ContextMenu DataContext="{Binding PlacementTarget.DataContext.Detail, RelativeSource={RelativeSource Self}}">
+                        <MenuItem Header="Ask AI" Command="{Binding AskAiCommand}" />
+                        <Separator />
+                        <MenuItem Header="Copy event (Ctrl+C)" Command="{Binding CopyCommand}" />
+                        <MenuItem Header="Copy message" Command="{Binding CopyMessageCommand}" />
+                        <Separator />
+                        <MenuItem Header="What happened around this" Command="{Binding AroundThisCommand}" />
+                        <MenuItem Header="All like this" Command="{Binding AllLikeThisCommand}" />
+                        <MenuItem Header="Search online" Command="{Binding SearchOnlineCommand}" />
+                        <Separator />
+                        <MenuItem Header="{Binding MuteText}" Command="{Binding ToggleMuteCommand}" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="" Width="8" CanUserSort="False" CanUserResize="False">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border Width="4" CornerRadius="2" Margin="0,6" HorizontalAlignment="Left"
-                                        Background="{Binding Severity, Converter={StaticResource SevBrush}}" />
+                                        Background="{Binding Converter={StaticResource EvBrush}}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Header="Time" Binding="{Binding TimeCreated, StringFormat=g}" Width="140" SortMemberPath="TimeCreated" />
-                    <DataGridTemplateColumn Header="Level" Width="96" SortMemberPath="Severity">
+                    <DataGridTemplateColumn Header="Time" Width="130" SortMemberPath="TimeCreated">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TimeCreated, Converter={StaticResource FriendlyTime}}" VerticalAlignment="Center"
+                                           ToolTip="{Binding TimeCreated, StringFormat=F}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Level" Width="100" SortMemberPath="Severity">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <Border CornerRadius="10" Padding="8,2" HorizontalAlignment="Left" VerticalAlignment="Center"
-                                        Background="{Binding Severity, Converter={StaticResource SevBrush}, ConverterParameter=soft}">
+                                        Background="{Binding Converter={StaticResource EvBrush}, ConverterParameter=soft}">
                                     <TextBlock Text="{Binding SeverityText}" FontSize="12" FontWeight="SemiBold"
-                                               Foreground="{Binding Severity, Converter={StaticResource SevBrush}}" />
+                                               Foreground="{Binding Converter={StaticResource EvBrush}}" />
                                 </Border>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                     <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="64" />
-                    <DataGridTextColumn Header="Source" Binding="{Binding Provider}" Width="190" />
+                    <DataGridTextColumn Header="Source" Binding="{Binding Provider}" Width="180" />
                     <DataGridTextColumn Header="What happened" Binding="{Binding Summary}" Width="*" />
                     <DataGridTemplateColumn Header="" Width="60" SortMemberPath="Count">
                         <DataGridTemplateColumn.CellTemplate>
@@ -163,104 +233,35 @@
                 </DataGrid.Columns>
             </DataGrid>
 
-            <!-- details -->
-            <Border Grid.Column="2" CornerRadius="12" Padding="20"
+            <!-- empty state -->
+            <Border CornerRadius="12" Padding="24" HorizontalAlignment="Center" VerticalAlignment="Center"
                     Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1"
-                    Visibility="{Binding Selected, Converter={StaticResource NullToVis}}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,10" DataContext="{Binding SelectedEvent}">
-                                <Border CornerRadius="10" Padding="9,2"
-                                        Background="{Binding Severity, Converter={StaticResource SevBrush}, ConverterParameter=soft}">
-                                    <TextBlock Text="{Binding SeverityText}" FontSize="12" FontWeight="SemiBold"
-                                               Foreground="{Binding Severity, Converter={StaticResource SevBrush}}" />
-                                </Border>
-                                <TextBlock Margin="10,0,0,0" VerticalAlignment="Center"
-                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                                    <Run Text="ID " /><Run Text="{Binding Id, Mode=OneWay}" FontWeight="SemiBold" />
-                                </TextBlock>
-                            </StackPanel>
-
-                            <TextBlock Text="{Binding SelectedEvent.Summary}" FontFamily="{StaticResource Display}"
-                                       FontSize="20" FontWeight="SemiBold" TextWrapping="Wrap" />
-                            <TextBlock Margin="0,4,0,0" FontSize="12" TextWrapping="Wrap"
-                                       Foreground="{DynamicResource TextFillColorTertiaryBrush}" DataContext="{Binding SelectedEvent}">
-                                <Run Text="{Binding TimeCreated, Mode=OneWay, StringFormat=F}" />
-                                <LineBreak />
-                                <Run Text="{Binding Provider, Mode=OneWay}" />
-                                <Run Text=" · " />
-                                <Run Text="{Binding LogName, Mode=OneWay}" />
-                                <Run Text=" · " />
-                                <Run Text="{Binding MachineName, Mode=OneWay}" />
-                            </TextBlock>
-
-                            <Border CornerRadius="8" Padding="10,6" Margin="0,10,0,0" HorizontalAlignment="Left"
-                                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
-                                    Visibility="{Binding Selected.IsGroup, Converter={StaticResource BoolToVis}}">
-                                <StackPanel Orientation="Horizontal">
-                                    <ui:SymbolIcon Symbol="ArrowRepeatAll24" FontSize="14" Margin="0,0,6,0" />
-                                    <TextBlock Text="{Binding Selected.OccurrenceText}" FontSize="12" TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-
-                            <!-- explanation -->
-                            <Border CornerRadius="8" Padding="14" Margin="0,16,0,16"
-                                    Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
-                                    BorderBrush="{DynamicResource AccentFillColorDefaultBrush}" BorderThickness="3,0,0,0"
-                                    Visibility="{Binding SelectedEvent.HasExplanation, Converter={StaticResource BoolToVis}}">
-                                <StackPanel>
-                                    <TextBlock Text="What it means" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                    <TextBlock Text="{Binding SelectedEvent.Explanation.What}" TextWrapping="Wrap" Margin="0,0,0,10" />
-                                    <TextBlock Text="What to do" FontWeight="SemiBold" Margin="0,0,0,4" />
-                                    <TextBlock Text="{Binding SelectedEvent.Explanation.Action}" TextWrapping="Wrap" />
-                                </StackPanel>
-                            </Border>
-
-                            <TextBlock Text="Original message" FontWeight="SemiBold" Margin="0,12,0,6" />
-                            <TextBox Text="{Binding SelectedEvent.Message, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
-                                     FontFamily="Cascadia Mono, Consolas" FontSize="12" BorderThickness="0"
-                                     Background="Transparent" />
-                        </StackPanel>
-                    </ScrollViewer>
-
-                    <!-- actions -->
-                    <WrapPanel Grid.Row="1" Margin="0,14,0,0">
-                        <ui:Button Content="Ask AI" Appearance="Primary" Command="{Binding AskAiCommand}" Margin="0,0,6,6">
-                            <ui:Button.Icon>
-                                <ui:SymbolIcon Symbol="Sparkle24" />
-                            </ui:Button.Icon>
-                        </ui:Button>
-                        <ui:Button Content="Copy" Command="{Binding CopyCommand}" Margin="0,0,6,6">
-                            <ui:Button.Icon>
-                                <ui:SymbolIcon Symbol="Copy24" />
-                            </ui:Button.Icon>
-                        </ui:Button>
-                        <ui:Button Content="Search online" Command="{Binding SearchOnlineCommand}" Margin="0,0,6,6">
-                            <ui:Button.Icon>
-                                <ui:SymbolIcon Symbol="Globe24" />
-                            </ui:Button.Icon>
-                        </ui:Button>
-                        <ui:Button Content="All like this" Command="{Binding FilterSimilarCommand}" Margin="0,0,6,6">
-                            <ui:Button.Icon>
-                                <ui:SymbolIcon Symbol="Filter24" />
-                            </ui:Button.Icon>
-                        </ui:Button>
-                    </WrapPanel>
-                </Grid>
+                    Visibility="{Binding IsEmpty, Converter={StaticResource BoolToVis}}">
+                <StackPanel HorizontalAlignment="Center">
+                    <ui:SymbolIcon Symbol="Search24" FontSize="32" HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                    <TextBlock Text="No events match these filters" FontSize="16" FontWeight="SemiBold" Margin="0,8,0,4" HorizontalAlignment="Center" />
+                    <TextBlock Text="Try a longer time range, a lower level, or turn off 'Hide harmless'." TextWrapping="Wrap" MaxWidth="320"
+                               TextAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:Button Content="Clear filters" Margin="0,12,0,0" HorizontalAlignment="Center" Command="{Binding ClearFilterCommand}" />
+                </StackPanel>
             </Border>
+
+            <!-- details -->
+            <views:EventDetailView Grid.Column="2" DataContext="{Binding Detail}"
+                                   Visibility="{Binding DataContext.Detail, ElementName=Root, Converter={StaticResource NullToVis}}" />
         </Grid>
 
         <!-- status -->
         <StackPanel Grid.Row="5" Orientation="Horizontal" Margin="0,10,0,0">
             <ui:ProgressRing IsIndeterminate="True" Width="14" Height="14" Margin="0,0,8,0"
                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
-            <TextBlock Text="{Binding Status}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            <TextBlock Text="{Binding Status}" VerticalAlignment="Center" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            <ui:Button Content="Cancel" Appearance="Transparent" Padding="8,2" Margin="8,0,0,0" Command="{Binding CancelCommand}"
+                       Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" />
+            <ui:Button Content="Load more (up to 50,000)" Appearance="Transparent" Padding="8,2" Margin="8,0,0,0" Command="{Binding LoadMoreCommand}"
+                       Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                       Visibility="{Binding LimitReached, Converter={StaticResource BoolToVis}}" />
         </StackPanel>
     </Grid>
 </Page>

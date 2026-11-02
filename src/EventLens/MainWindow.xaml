@@ -5,7 +5,7 @@
                  xmlns:views="clr-namespace:EventLens.Views"
                  Title="EventLens"
                  Icon="pack://application:,,,/Assets/eventlens.ico"
-                 Width="1280" Height="820" MinWidth="980" MinHeight="600"
+                 Width="1320" Height="840" MinWidth="980" MinHeight="600"
                  WindowStartupLocation="CenterScreen"
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica"
@@ -13,19 +13,29 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" Title="EventLens">
+        <ui:TitleBar Grid.Row="0" Title="EventLens - the Event Viewer++ that explains itself">
             <ui:TitleBar.Icon>
                 <ui:ImageIcon Source="pack://application:,,,/Assets/eventlens-32.png" />
             </ui:TitleBar.Icon>
         </ui:TitleBar>
 
+        <!-- new version available -->
+        <ui:InfoBar x:Name="UpdateBar" Grid.Row="1" Margin="12,0,12,6" IsOpen="False" IsClosable="True" Severity="Informational"
+                    Title="A new version of EventLens is available">
+            <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                <ui:Button Content="Download" Appearance="Primary" Click="OnDownloadUpdate" Margin="0,0,8,0" />
+                <ui:Button Content="Skip this version" Click="OnSkipUpdate" />
+            </StackPanel>
+        </ui:InfoBar>
+
         <ui:NavigationView x:Name="RootNavigation"
-                           Grid.Row="1"
+                           Grid.Row="2"
                            PaneDisplayMode="Left"
-                           IsBackButtonVisible="Collapsed"
+                           IsBackButtonVisible="Visible"
                            IsPaneToggleVisible="True"
                            OpenPaneLength="220">
             <ui:NavigationView.MenuItems>
@@ -34,9 +44,24 @@
                         <ui:SymbolIcon Symbol="Home24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Findings" TargetPageType="{x:Type views:FindingsPage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="Lightbulb24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Events" TargetPageType="{x:Type views:EventsPage}">
                     <ui:NavigationViewItem.Icon>
                         <ui:SymbolIcon Symbol="List24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Timeline" TargetPageType="{x:Type views:TimelinePage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="History24" />
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
+                <ui:NavigationViewItem Content="Compare" TargetPageType="{x:Type views:ComparePage}">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:SymbolIcon Symbol="ArrowSwap24" />
                     </ui:NavigationViewItem.Icon>
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItem Content="Restarts" TargetPageType="{x:Type views:RestartsPage}">

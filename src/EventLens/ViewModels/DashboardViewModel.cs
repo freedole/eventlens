@@ -112,6 +112,8 @@ public sealed class DashboardViewModel : ObservableObject
     public IRelayCommand OpenIssuesCommand { get; }
     public IAsyncRelayCommand ExportCommand { get; }
     public IRelayCommand WhyRestartCommand { get; }
+    public IRelayCommand OpenFindingsCommand { get; }
+    public FindingsViewModel Findings => Navigator.Findings;
 
     public DashboardViewModel()
     {
@@ -132,6 +134,9 @@ public sealed class DashboardViewModel : ObservableObject
         }));
         ExportCommand = new AsyncRelayCommand(ExportAsync);
         WhyRestartCommand = new RelayCommand(() => Navigator.Navigate(typeof(Views.RestartsPage)));
+        OpenFindingsCommand = new RelayCommand(() => Navigator.Navigate(typeof(Views.FindingsPage)));
+
+        AppState.MutedChanged += (_, _) => { if (_loadedOnce && !IsLoading) _ = RefreshAsync(); };
 
         AppState.SourceChanged += (_, _) =>
         {
@@ -204,14 +209,17 @@ public sealed class DashboardViewModel : ObservableObject
             var tLogon = SafeQuery(["Security"], EventLogService.BuildXPath(null, Month, [4625]), cap);
             var tTimeline = LoadTimelineAsync();
 
-            var errors = await tErr ?? new List<EventItem>();
+            var allErrors = await tErr ?? new List<EventItem>();
+            HistoryStore.RecordEvents(allErrors);
+            var errors = allErrors.Where(e => !e.IsHarmless).ToList();
+            var harmless = allErrors.Count - errors.Count;
             var shutdowns = errors.Where(e => e.Id is 41 or 6008).ToList();
             var bsod = errors.Where(e => e.Id == 1001 && e.Provider == "Microsoft-Windows-WER-SystemErrorReporting").ToList();
             var crashes = errors.Where(e => e.Id is 1000 or 1002 or 1026).ToList();
             SetCard(UnexpectedShutdowns, shutdowns, true, "last 30 days", warnAt: 1, badAt: 2);
             SetCard(BlueScreens, bsod, true, "last 30 days", warnAt: 1, badAt: 1);
             SetCard(AppCrashes, crashes, true, "last 30 days", warnAt: 3, badAt: 10);
-            SetCard(Errors, errors, false, "System + Application", warnAt: 10, badAt: 50);
+            SetCard(Errors, errors, false, harmless > 0 ? $"{harmless:N0} harmless hidden (30 days)" : "System + Application", warnAt: 10, badAt: 50);
             BuildHeatmap(errors);
 
             var disk = (await tDisk ?? new List<EventItem>()).Where(e => IsDiskProvider(e.Provider)).ToList();
@@ -219,7 +227,7 @@ public sealed class DashboardViewModel : ObservableObject
 
             ComputeScore(shutdowns.Count, bsod.Count, crashes.Count, disk.Count, CountToday(errors));
 
-            var warn = await tWarn ?? new List<EventItem>();
+            var warn = (await tWarn ?? new List<EventItem>()).Where(e => !e.IsHarmless).ToList();
             SetCard(Warnings, warn, false, "System + Application", warnAt: 50, badAt: 200, neutral: true);
 
             var logons = await tLogon;
@@ -234,6 +242,7 @@ public sealed class DashboardViewModel : ObservableObject
 
             await tTimeline;
             Status = $"Updated {DateTime.Now:t} · {sw.Elapsed.TotalSeconds:0.0} s";
+            _ = Navigator.Findings.RefreshAsync();
         }
         catch (Exception ex)
         {
@@ -335,7 +344,8 @@ public sealed class DashboardViewModel : ObservableObject
     {
         var sys = SafeQuery(["System"], EventLogService.BuildXPath(null, Month, [41, 6008, 1074, 1001, 7031, 7034, 7, 55]), 40, true);
         var app = SafeQuery(["Application"], EventLogService.BuildXPath(null, Month, [1000, 1002, 1026]), 40, true);
-        var all = (await sys ?? new List<EventItem>()).Concat(await app ?? new List<EventItem>()).OrderByDescending(e => e.TimeCreated).Take(25).ToList();
+        var all = (await sys ?? new List<EventItem>()).Concat(await app ?? new List<EventItem>())
+            .Where(e => !e.IsHarmless).OrderByDescending(e => e.TimeCreated).Take(25).ToList();
 
         Timeline.Clear();
         foreach (var e in all) Timeline.Add(e);

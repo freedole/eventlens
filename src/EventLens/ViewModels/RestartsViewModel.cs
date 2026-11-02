@@ -95,7 +95,10 @@ public sealed class RestartsViewModel : ObservableObject
     private void OpenEvents(RestartInfo? r)
     {
         if (r is null) return;
-        Navigator.OpenEvents(SpecFor(r));
+        // centre the timeline on the shutdown (or the boot if no shutdown was logged)
+        var center = r.ShutdownTime ?? r.Evidence.LastOrDefault()?.TimeCreated ?? r.BootTime;
+        var minutes = (int)Math.Clamp((r.BootTime - center).TotalMinutes + 10, 15, 180);
+        Navigator.OpenTimeline(center, minutes);
     }
 
     private async Task AskAiAsync(RestartInfo? r)
@@ -118,13 +121,14 @@ public sealed class RestartsViewModel : ObservableObject
         sb.AppendLine();
         sb.AppendLine("SHUTDOWN/BOOT EVIDENCE:");
         foreach (var e in r.Evidence)
-            sb.AppendLine($"- {e.TimeCreated:yyyy-MM-dd HH:mm:ss} {e.Provider} ID {e.Id}: {AiService.OneLine(e.Message)}");
+            sb.AppendLine($"- {e.TimeCreated:yyyy-MM-dd HH:mm:ss} {e.Provider} ID {e.Id}: {AiService.Short(e.Message, 300)}");
         sb.AppendLine();
         sb.AppendLine("ERRORS AND WARNINGS AROUND THE RESTART:");
-        foreach (var e in around.OrderBy(e => e.TimeCreated))
-            sb.AppendLine($"- {e.TimeCreated:HH:mm:ss} {e.Severity} {e.LogName}/{e.Provider} ID {e.Id}: {AiService.OneLine(e.Message)}");
+        foreach (var e in around.Where(e => !e.IsHarmless).OrderBy(e => e.TimeCreated).TakeLast(20))
+            sb.AppendLine($"- {e.TimeCreated:HH:mm:ss} {e.Severity} {e.Provider} {e.Id}: {AiService.Short(e.Message, 160)}");
 
         AiWindow.Open($"Restart on {r.BootTime:d MMM HH:mm}", sb.ToString(),
-            "Why did this computer restart? Give the most likely root cause, how confident you are, and what I should check or change to prevent it.");
+            "Why did this computer restart? Give the most likely root cause, how confident you are, and what I should check or change to prevent it.",
+            "restart");
     }
 }

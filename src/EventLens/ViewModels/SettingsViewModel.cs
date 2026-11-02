@@ -3,6 +3,7 @@ using System.Security.Principal;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EventLens.Core.Knowledge;
 using EventLens.Services;
 using Wpf.Ui.Appearance;
 
@@ -33,6 +34,7 @@ public sealed class SettingsViewModel : ObservableObject
 
         RestartAsAdminCommand = new RelayCommand(RestartAsAdmin, () => !IsAdmin);
         TestAiCommand = new AsyncRelayCommand(TestAiAsync);
+        InitExtraCommands();
     }
 
     /// <summary>Applies the saved theme at startup.</summary>
@@ -150,11 +152,74 @@ public sealed class SettingsViewModel : ObservableObject
 
     // ---------- about / permissions ----------
 
-    public string Version =>
-        Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion?.Split('+')[0]
-        ?? "dev";
+    public string Version => OnlineServices.AppVersion;
 
-    public string KnowledgeInfo => $"{EventKnowledge.Count} known event types explained";
+    // ---------- knowledge base / updates / privacy ----------
+
+    private string _kbStatus = "";
+    private string _updateStatus = "";
+
+    public string KnowledgeInfo => $"{KnowledgeBase.Count} explained events · version {KnowledgeBase.Version} ({KnowledgeBase.Source}) · {ErrorCodes.BugcheckCount} stop codes";
+    public string KbStatus { get => _kbStatus; set => SetProperty(ref _kbStatus, value); }
+    public string UpdateStatus { get => _updateStatus; set => SetProperty(ref _updateStatus, value); }
+
+    public bool KbAutoUpdate
+    {
+        get => AppSettings.Current.KbAutoUpdate;
+        set { AppSettings.Current.KbAutoUpdate = value; AppSettings.Current.Save(); OnPropertyChanged(); }
+    }
+
+    public bool CheckForUpdates
+    {
+        get => AppSettings.Current.CheckForUpdates;
+        set { AppSettings.Current.CheckForUpdates = value; AppSettings.Current.Save(); OnPropertyChanged(); }
+    }
+
+    public bool IncludePrereleases
+    {
+        get => AppSettings.Current.IncludePrereleases;
+        set { AppSettings.Current.IncludePrereleases = value; AppSettings.Current.Save(); OnPropertyChanged(); }
+    }
+
+    public IAsyncRelayCommand SyncKbCommand { get; private set; } = null!;
+    public IAsyncRelayCommand CheckUpdateCommand { get; private set; } = null!;
+    public IRelayCommand ReportIssueCommand { get; private set; } = null!;
+    public IRelayCommand OpenLogsCommand { get; private set; } = null!;
+    public IRelayCommand OpenDataFolderCommand { get; private set; } = null!;
+    public IRelayCommand ClearAiCacheCommand { get; private set; } = null!;
+
+    private void InitExtraCommands()
+    {
+        SyncKbCommand = new AsyncRelayCommand(async () =>
+        {
+            KbStatus = "Checking GitHub…";
+            KbStatus = await OnlineServices.SyncKnowledgeAsync(force: true);
+            OnPropertyChanged(nameof(KnowledgeInfo));
+        });
+        CheckUpdateCommand = new AsyncRelayCommand(async () =>
+        {
+            UpdateStatus = "Checking GitHub…";
+            var u = await OnlineServices.CheckForUpdateAsync(force: true);
+            UpdateStatus = u is null ? $"You have the latest version ({Version})." : $"Version {u.Version} is available.";
+            if (u is not null) UpdateAvailable?.Invoke(this, u);
+        });
+        ReportIssueCommand = new RelayCommand(() => OpenUrl(OnlineServices.IssueUrl()));
+        OpenLogsCommand = new RelayCommand(App.OpenLogFolder);
+        OpenDataFolderCommand = new RelayCommand(() => OpenUrl(AppSettings.Folder));
+        ClearAiCacheCommand = new RelayCommand(() =>
+        {
+            var n = HistoryStore.ClearAiCache();
+            AiStatus = $"Removed {n} saved AI answer(s).";
+        });
+    }
+
+    public static event EventHandler<UpdateInfo>? UpdateAvailable;
+
+    private static void OpenUrl(string url)
+    {
+        try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) { UseShellExecute = true }); }
+        catch { /* no shell */ }
+    }
 
     public bool IsAdmin { get; } = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
     public string AdminText => IsAdmin ? "Running as administrator - all logs available" : "Not elevated - the Security log is not readable";

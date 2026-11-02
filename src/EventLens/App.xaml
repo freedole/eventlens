@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
              xmlns:conv="clr-namespace:EventLens.Converters"
-             StartupUri="MainWindow.xaml">
+            >
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -12,6 +12,10 @@
             </ResourceDictionary.MergedDictionaries>
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
             <conv:InvertBoolConverter x:Key="InvertBool" />
+            <conv:PlusOneConverter x:Key="PlusOne" />
+            <conv:RelativeTimeConverter x:Key="RelTime" />
+            <conv:FriendlyTimeConverter x:Key="FriendlyTime" />
+            <conv:EventToBrushConverter x:Key="EvBrushGlobal" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

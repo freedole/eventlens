@@ -11,7 +11,10 @@ public static class Navigator
     public static NavigationView? View { get; set; }
 
     public static DashboardViewModel Dashboard { get; } = new();
+    public static FindingsViewModel Findings { get; } = new();
     public static EventsViewModel Events { get; } = new();
+    public static TimelineViewModel Timeline { get; } = new();
+    public static CompareViewModel Compare { get; } = new();
     public static RestartsViewModel Restarts { get; } = new();
     public static ComputersViewModel Computers { get; } = new();
     public static SettingsViewModel Settings { get; } = new();
@@ -22,5 +25,11 @@ public static class Navigator
     {
         _ = Events.ApplyAsync(spec);
         Navigate(typeof(EventsPage));
+    }
+
+    public static void OpenTimeline(DateTime at, int minutes)
+    {
+        _ = Timeline.ShowAsync(at, minutes);
+        Navigate(typeof(TimelinePage));
     }
 }

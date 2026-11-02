@@ -62,6 +62,10 @@ public sealed class EventSource
     /// <summary>In file mode the requested log name is ignored - the file is the log.</summary>
     public bool IgnoresLogName => Kind == SourceKind.File;
 
+    public EventLogSession CreateSession() => Kind == SourceKind.Remote
+        ? (User is null ? new EventLogSession(Computer) : new EventLogSession(Computer, Domain, User, Password, SessionAuthentication.Default))
+        : new EventLogSession();
+
     public EventLogQuery CreateQuery(string log, string xpath)
     {
         var q = Kind == SourceKind.File
@@ -79,10 +83,26 @@ public sealed class EventSource
     }
 }
 
-/// <summary>App-wide current source; pages reload when it changes.</summary>
+/// <summary>App-wide current source and user "harmless" list; pages reload when they change.</summary>
 public static class AppState
 {
     private static EventSource _source = EventSource.Local;
+
+    /// <summary>Event types (Provider|Id) the user marked as harmless.</summary>
+    public static HashSet<string> Muted { get; private set; } = new(StringComparer.OrdinalIgnoreCase);
+
+    public static void LoadMuted() => Muted = HistoryStore.GetMuted();
+
+    public static bool IsMuted(string typeKey) => Muted.Contains(typeKey);
+
+    public static void SetMuted(string typeKey, bool muted)
+    {
+        if (muted) Muted.Add(typeKey); else Muted.Remove(typeKey);
+        HistoryStore.SetMuted(typeKey, muted);
+        MutedChanged?.Invoke(null, EventArgs.Empty);
+    }
+
+    public static event EventHandler? MutedChanged;
 
     public static EventSource Source
     {

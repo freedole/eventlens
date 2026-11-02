@@ -1,0 +1,459 @@
+{
+ "entries": [
+  {
+   "provider": "Application Error",
+   "id": 1000,
+   "class": "attention",
+   "category": "Crash",
+   "title": "Application crashed",
+   "summary": "{0} crashed in {3} ({6|status})",
+   "what": "A program closed unexpectedly. The faulting module tells where it crashed: the program itself, a Windows DLL, or a third-party add-on.",
+   "causes": [
+    "Bug in the program",
+    "Third-party DLL injected into the program (antivirus, overlays, shell extensions)",
+    "Corrupted installation or missing runtime",
+    "Bad RAM if many unrelated programs crash"
+   ],
+   "fix": [
+    "Update or reinstall the program",
+    "If the faulting module belongs to another product (overlay, antivirus, plugin), update or remove that product",
+    "Install the latest Visual C++ / .NET runtimes",
+    "Many different programs crashing = test RAM and run sfc /scannow"
+   ],
+   "related": [
+    1001,
+    1002,
+    1026
+   ]
+  },
+  {
+   "provider": "Application Error",
+   "id": 1005,
+   "class": "attention",
+   "category": "Crash",
+   "title": "Program could not access a file",
+   "what": "Windows could not access a file needed by a program and closed it (often a network or removable drive).",
+   "causes": [
+    "Program run from a network share or USB drive that disconnected"
+   ],
+   "fix": [
+    "Run the program from a local disk; check the network/drive"
+   ]
+  },
+  {
+   "provider": "Application Hang",
+   "id": 1002,
+   "class": "attention",
+   "category": "Crash",
+   "title": "Application stopped responding",
+   "summary": "{0} stopped responding and was closed",
+   "what": "A program hung and was closed (by the user or by Windows).",
+   "causes": [
+    "Waiting for a slow network share or disk",
+    "Antivirus scanning",
+    "Program bug or deadlock"
+   ],
+   "fix": [
+    "Update the program",
+    "Check whether it was waiting on a network drive or printer",
+    "If frequent, check disk health"
+   ]
+  },
+  {
+   "provider": "Windows Error Reporting",
+   "id": 1001,
+   "class": "info",
+   "category": "Crash",
+   "title": "Error report (fault bucket)",
+   "what": "Windows Error Reporting recorded details about a crash or hang that happened right before. Look at the related crash event.",
+   "causes": [],
+   "fix": [],
+   "related": [
+    1000,
+    1002
+   ]
+  },
+  {
+   "provider": ".NET Runtime",
+   "id": 1026,
+   "class": "attention",
+   "category": "Crash",
+   "title": ".NET application crashed",
+   "what": "A .NET program crashed with an unhandled exception. The message contains the exception type and stack trace.",
+   "causes": [
+    "Bug in the program",
+    "Missing configuration or file",
+    "Wrong .NET version"
+   ],
+   "fix": [
+    "Send the exception text to the vendor; update the program"
+   ],
+   "related": [
+    1000
+   ]
+  },
+  {
+   "provider": ".NET Runtime",
+   "id": 1025,
+   "class": "attention",
+   "category": "Crash",
+   "title": ".NET application terminated itself",
+   "what": "A .NET program requested immediate termination (FailFast), usually after detecting a fatal error.",
+   "causes": [
+    "Program bug"
+   ],
+   "fix": [
+    "Update the program"
+   ]
+  },
+  {
+   "provider": ".NET Runtime",
+   "id": 1023,
+   "class": "critical",
+   "category": "Crash",
+   "title": ".NET fatal execution engine error",
+   "what": "The .NET runtime itself hit a fatal error.",
+   "causes": [
+    "Corrupted .NET installation",
+    "Native code corrupting memory"
+   ],
+   "fix": [
+    "Repair/reinstall .NET",
+    "Update the program"
+   ]
+  },
+  {
+   "provider": ".NET Runtime",
+   "id": 1022,
+   "class": "harmless",
+   "category": "System",
+   "title": "Profiler attach infrastructure failed (harmless)",
+   "what": "A .NET Framework process could not initialize the profiler-attach channel, typically because it runs under a restricted account. Developer diagnostics only; has no effect on the program.",
+   "causes": [
+    "Service running as a restricted account (LocalService, sandbox)"
+   ],
+   "fix": [
+    "Safe to ignore"
+   ]
+  },
+  {
+   "provider": "SideBySide",
+   "ids": [
+    33,
+    35,
+    59,
+    63,
+    80
+   ],
+   "class": "attention",
+   "category": "Crash",
+   "title": "Program could not start: missing runtime",
+   "what": "Windows could not build the runtime environment for a program - usually a missing Microsoft Visual C++ Redistributable.",
+   "causes": [
+    "Visual C++ Redistributable missing or damaged",
+    "Corrupted program manifest"
+   ],
+   "fix": [
+    "Install the latest Microsoft Visual C++ Redistributables (x86 and x64)",
+    "Reinstall the program"
+   ]
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 11707,
+   "class": "info",
+   "category": "Software",
+   "title": "Program installed",
+   "what": "Windows Installer completed an installation successfully.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 11708,
+   "class": "attention",
+   "category": "Software",
+   "title": "Program installation failed",
+   "what": "A Windows Installer installation failed.",
+   "causes": [
+    "Missing prerequisites",
+    "Permissions",
+    "Previous version blocking"
+   ],
+   "fix": [
+    "Run the installer with logging: msiexec /i package.msi /l*v install.log",
+    "Look for 'Return value 3' in the log"
+   ]
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 11724,
+   "class": "info",
+   "category": "Software",
+   "title": "Program removed",
+   "what": "Windows Installer removed a program.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 1033,
+   "class": "info",
+   "category": "Software",
+   "title": "Installation finished",
+   "what": "Windows Installer finished installing a product. Status 0 = success.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 1034,
+   "class": "info",
+   "category": "Software",
+   "title": "Program removal finished",
+   "what": "Windows Installer finished removing a product. Status 0 = success.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 1035,
+   "class": "info",
+   "category": "Software",
+   "title": "Program reconfigured",
+   "what": "Windows Installer reconfigured (repaired/changed) a product.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "MsiInstaller",
+   "ids": [
+    1040,
+    1042
+   ],
+   "class": "harmless",
+   "category": "Software",
+   "title": "Installer transaction begin/end",
+   "what": "Windows Installer started or ended a transaction. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 1004,
+   "class": "harmless",
+   "category": "Software",
+   "title": "Installer detected a missing component",
+   "what": "Windows Installer noticed a component was missing and may self-repair. Usually harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "MsiInstaller",
+   "id": 1001,
+   "class": "harmless",
+   "category": "Software",
+   "title": "Installer self-repair check",
+   "what": "Windows Installer detected a feature to repair. Usually harmless unless it repeats at every program start.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-RestartManager",
+   "ids": [
+    10000,
+    10001,
+    10002,
+    10005,
+    10010
+   ],
+   "class": "harmless",
+   "category": "Software",
+   "title": "Restart Manager session",
+   "what": "An installer used Restart Manager to close and restart programs during an install. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-User Profiles Service",
+   "id": 1530,
+   "class": "harmless",
+   "category": "Profile",
+   "title": "Registry file still in use at logoff",
+   "what": "A program kept the user's registry open at logoff; Windows freed it. Very common and harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-User Profiles Service",
+   "id": 1511,
+   "class": "critical",
+   "category": "Profile",
+   "title": "Logged on with a temporary profile",
+   "what": "Windows could not load the user's profile and created a temporary one. Changes will be lost at logoff.",
+   "causes": [
+    "Corrupted user profile",
+    "ProfileList registry entry with .bak",
+    "Disk errors"
+   ],
+   "fix": [
+    "Check HKLM\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\ProfileList for a .bak duplicate of the user's SID",
+    "Back up data, then fix or recreate the profile"
+   ],
+   "related": [
+    1515,
+    1508
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-User Profiles Service",
+   "id": 1515,
+   "class": "attention",
+   "category": "Profile",
+   "title": "Profile loaded from backup",
+   "what": "Windows backed up and used a copy of the user's profile because the original could not be loaded.",
+   "causes": [
+    "Profile corruption"
+   ],
+   "fix": [
+    "Same as for temporary profiles"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-User Profiles Service",
+   "id": 1508,
+   "class": "critical",
+   "category": "Profile",
+   "title": "Could not load user profile registry",
+   "what": "Windows could not load the user's registry file (NTUSER.DAT).",
+   "causes": [
+    "File locked by antivirus/backup",
+    "Corruption"
+   ],
+   "fix": [
+    "Restart; if it repeats, repair or recreate the profile"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-User Profiles Service",
+   "id": 1500,
+   "class": "critical",
+   "category": "Profile",
+   "title": "Logon failed: profile not found",
+   "what": "The user could not log on because the profile could not be found or created.",
+   "causes": [
+    "Default profile damaged",
+    "Permissions"
+   ],
+   "fix": [
+    "Check C:\\Users\\Default and permissions"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-User Profiles Service",
+   "id": 1534,
+   "class": "harmless",
+   "category": "Profile",
+   "title": "Profile notification event",
+   "what": "A component did not handle a profile notification. Commonly harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Folder Redirection",
+   "id": 502,
+   "class": "attention",
+   "category": "Profile",
+   "title": "Folder redirection failed",
+   "what": "A user folder could not be redirected to its network location.",
+   "causes": [
+    "Share unreachable",
+    "Permissions"
+   ],
+   "fix": [
+    "Check access to the target share"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Shell-Core",
+   "id": 9707,
+   "class": "harmless",
+   "category": "System",
+   "title": "Run key command started",
+   "what": "Explorer started a command from a Run registry key. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Winsrv",
+   "id": 10001,
+   "class": "info",
+   "category": "System",
+   "title": "Application blocked shutdown",
+   "what": "An application prevented Windows from shutting down or kept it waiting.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Application Popup",
+   "id": 26,
+   "class": "attention",
+   "category": "System",
+   "title": "System pop-up message",
+   "what": "Windows showed a pop-up error message (the text is in the message).",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Diagnostics-Performance",
+   "id": 100,
+   "class": "info",
+   "category": "Performance",
+   "title": "Boot performance",
+   "what": "How long Windows took to start, with details on slow components.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Diagnostics-Performance",
+   "id": 200,
+   "class": "info",
+   "category": "Performance",
+   "title": "Shutdown performance",
+   "what": "How long Windows took to shut down.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Diagnostics-Performance",
+   "ids": [
+    101,
+    102,
+    103,
+    109
+   ],
+   "class": "info",
+   "category": "Performance",
+   "title": "Something slowed down startup",
+   "what": "A program, driver or service made Windows start slower than normal. The message names it.",
+   "causes": [],
+   "fix": [
+    "Update or remove the named component if boot is slow"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Diagnostics-Performance",
+   "ids": [
+    201,
+    202,
+    203
+   ],
+   "class": "info",
+   "category": "Performance",
+   "title": "Something slowed down shutdown",
+   "what": "A service or program made shutdown slower than normal. The message names it.",
+   "causes": [],
+   "fix": []
+  }
+ ]
+}

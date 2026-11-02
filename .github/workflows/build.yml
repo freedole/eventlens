@@ -14,9 +14,9 @@ jobs:
   build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
 
@@ -25,8 +25,17 @@ jobs:
         shell: pwsh
         run: |
           if ($env:GITHUB_REF -like 'refs/tags/v*') { $v = $env:GITHUB_REF_NAME.Substring(1) }
-          else { $v = "0.1.0-ci.$env:GITHUB_RUN_NUMBER" }
+          else { $v = "0.2.0-ci.$env:GITHUB_RUN_NUMBER" }
           "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Knowledge base is valid JSON
+        shell: pwsh
+        run: |
+          Get-ChildItem knowledge/*.json | ForEach-Object { $null = Get-Content $_ -Raw | ConvertFrom-Json }
+          Write-Host "Knowledge files OK"
+
+      - name: Unit tests
+        run: dotnet test tests/EventLens.Tests/EventLens.Tests.csproj -c Release --logger "console;verbosity=normal"
 
       - name: Publish (single-file, self-contained)
         run: >
@@ -44,7 +53,7 @@ jobs:
           "$h  $zip" | Out-File SHA256SUMS.txt -Encoding ascii
           Get-ChildItem out, $zip | Format-Table Name, Length
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: EventLens-${{ steps.ver.outputs.version }}
           path: |
@@ -59,4 +68,6 @@ jobs:
             EventLens-*.zip
             SHA256SUMS.txt
           prerelease: ${{ contains(github.ref_name, '-') }}
-          generate_release_notes: true
+          body_path: docs/RELEASE_NOTES.md
+          append_body: true
+          generate_release_notes: false

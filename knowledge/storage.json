@@ -1,0 +1,543 @@
+{
+ "entries": [
+  {
+   "provider": "disk",
+   "id": 7,
+   "class": "critical",
+   "category": "Storage",
+   "title": "Bad block on disk",
+   "summary": "Bad block on {0}",
+   "what": "The disk reported a sector it could not read. Data in that area may be lost and the disk may be failing.",
+   "causes": [
+    "Failing hard disk or SSD",
+    "Bad SATA/USB cable or enclosure (external disks)"
+   ],
+   "fix": [
+    "Back up important data now",
+    "Check SMART health (CrystalDiskInfo, or: Get-PhysicalDisk | Get-StorageReliabilityCounter)",
+    "Run chkdsk /r on the volume",
+    "Replace the disk if errors repeat"
+   ],
+   "related": [
+    51,
+    153,
+    11,
+    52
+   ]
+  },
+  {
+   "provider": "disk",
+   "id": 11,
+   "class": "critical",
+   "category": "Storage",
+   "title": "Disk controller error",
+   "summary": "Controller error on {0}",
+   "what": "The driver detected a controller error on the disk.",
+   "causes": [
+    "Loose or bad cable",
+    "Failing disk or controller",
+    "Faulty USB enclosure or hub"
+   ],
+   "fix": [
+    "Reseat/replace the cable; try another port",
+    "Check SMART health",
+    "Update storage controller drivers and BIOS"
+   ],
+   "related": [
+    7,
+    153
+   ]
+  },
+  {
+   "provider": "disk",
+   "id": 15,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Disk not ready",
+   "summary": "Device {0} is not ready for access",
+   "what": "A disk was not ready when Windows tried to access it.",
+   "causes": [
+    "Disk spinning up or going to sleep",
+    "Removed USB disk",
+    "Failing disk"
+   ],
+   "fix": [
+    "Harmless once for removable drives; if repeated on internal disks check power settings and disk health"
+   ]
+  },
+  {
+   "provider": "disk",
+   "id": 51,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Error during paging operation",
+   "summary": "Paging error on {0}",
+   "what": "An error occurred while Windows read or wrote the page file or memory-mapped data on this disk.",
+   "causes": [
+    "Failing disk",
+    "Bad cable",
+    "USB disk disconnected",
+    "Unstable power"
+   ],
+   "fix": [
+    "Check SMART health and cables",
+    "If it is a USB drive, check whether it was unplugged at that time"
+   ],
+   "related": [
+    7,
+    153
+   ]
+  },
+  {
+   "provider": "disk",
+   "id": 52,
+   "class": "critical",
+   "category": "Storage",
+   "title": "Disk predicts it will fail (SMART)",
+   "summary": "SMART warning: {0} predicts it will fail",
+   "what": "The disk's own self-monitoring (SMART) reported that it is likely to fail soon.",
+   "causes": [
+    "Worn-out or failing disk"
+   ],
+   "fix": [
+    "Back up immediately",
+    "Replace the disk"
+   ]
+  },
+  {
+   "provider": "disk",
+   "id": 153,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Disk I/O was retried",
+   "what": "A read/write to the disk did not complete in time and had to be retried. Occasional retries are tolerable; many are an early sign of trouble.",
+   "causes": [
+    "Failing disk or SSD",
+    "Bad cable or port",
+    "Outdated storage driver or SSD firmware",
+    "Aggressive power saving on the disk/controller"
+   ],
+   "fix": [
+    "Check SMART health",
+    "Update SSD firmware and the storage controller driver",
+    "Replace the SATA cable",
+    "Disable link power management for the disk if it happens after idle"
+   ],
+   "related": [
+    7,
+    129
+   ]
+  },
+  {
+   "provider": "disk",
+   "id": 157,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Disk was surprise-removed",
+   "summary": "Disk was surprise-removed: {0}",
+   "what": "A disk disappeared without being safely removed.",
+   "causes": [
+    "USB drive unplugged",
+    "Loose cable",
+    "Disk or enclosure lost power"
+   ],
+   "fix": [
+    "Harmless for USB drives removed on purpose; otherwise check cables and power"
+   ]
+  },
+  {
+   "provider": "storahci",
+   "id": 129,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Storage controller reset a device",
+   "what": "The SATA (AHCI) driver reset a disk because it stopped responding.",
+   "causes": [
+    "Failing disk or SSD",
+    "Bad SATA cable",
+    "SSD firmware or power management issue"
+   ],
+   "fix": [
+    "Check SMART health",
+    "Replace the SATA cable",
+    "Update SSD firmware and chipset drivers"
+   ],
+   "related": [
+    153
+   ]
+  },
+  {
+   "provider": "stornvme",
+   "id": 129,
+   "class": "attention",
+   "category": "Storage",
+   "title": "NVMe controller reset",
+   "what": "The NVMe driver reset an SSD because it stopped responding.",
+   "causes": [
+    "SSD firmware bug",
+    "Overheating NVMe SSD",
+    "Power state transition (APST) problems"
+   ],
+   "fix": [
+    "Update SSD firmware",
+    "Check SSD temperature",
+    "Try disabling PCIe Link State Power Management in the power plan"
+   ],
+   "related": [
+    153
+   ]
+  },
+  {
+   "provider": "stornvme",
+   "id": 11,
+   "class": "critical",
+   "category": "Storage",
+   "title": "NVMe controller error",
+   "what": "The NVMe driver reported a controller error.",
+   "causes": [
+    "Failing SSD or slot",
+    "Firmware problem"
+   ],
+   "fix": [
+    "Update SSD firmware",
+    "Check SMART health",
+    "Reseat the SSD"
+   ]
+  },
+  {
+   "provider": "iaStorA",
+   "id": 129,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Intel RST reset a device",
+   "what": "The Intel Rapid Storage driver reset a disk that stopped responding.",
+   "causes": [
+    "Failing disk",
+    "Cable",
+    "Outdated RST driver"
+   ],
+   "fix": [
+    "Update Intel RST driver",
+    "Check disk health and cable"
+   ]
+  },
+  {
+   "provider": "Ntfs",
+   "id": 55,
+   "class": "critical",
+   "category": "Storage",
+   "title": "File system corruption detected",
+   "what": "NTFS found a corrupted structure on a volume.",
+   "causes": [
+    "Unexpected shutdown during writes",
+    "Failing disk",
+    "Driver or RAM problems"
+   ],
+   "fix": [
+    "Run chkdsk /f on the volume (needs restart for C:)",
+    "Check disk health",
+    "If it repeats, test RAM"
+   ],
+   "related": [
+    98,
+    130
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Ntfs",
+   "id": 55,
+   "class": "critical",
+   "category": "Storage",
+   "title": "File system corruption detected",
+   "what": "NTFS found a corrupted structure on a volume.",
+   "causes": [
+    "Unexpected shutdown during writes",
+    "Failing disk",
+    "Driver or RAM problems"
+   ],
+   "fix": [
+    "Run chkdsk /f on the volume (needs restart for C:)",
+    "Check disk health"
+   ],
+   "related": [
+    98,
+    130
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Ntfs",
+   "id": 98,
+   "class": "info",
+   "category": "Storage",
+   "title": "Volume health check",
+   "what": "Windows checked a volume when it was mounted. The message says whether it is healthy or needs repair.",
+   "causes": [],
+   "fix": [
+    "If the message says the volume needs to be repaired, run chkdsk /f"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Ntfs",
+   "id": 130,
+   "class": "attention",
+   "category": "Storage",
+   "title": "File system structure repaired",
+   "what": "NTFS self-healing repaired a corrupted file system structure.",
+   "causes": [
+    "Earlier corruption (crash, power loss, failing disk)"
+   ],
+   "fix": [
+    "Harmless if rare; if repeated, check disk health"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Ntfs",
+   "id": 140,
+   "class": "critical",
+   "category": "Storage",
+   "title": "Failed to flush data to the transaction log",
+   "what": "Windows could not write data to the disk's transaction log. Corruption may occur.",
+   "causes": [
+    "Disk removed or disconnected while in use",
+    "Failing disk",
+    "Storage driver problem"
+   ],
+   "fix": [
+    "If it is a USB drive, always use Safely Remove",
+    "Check disk health and cables"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Ntfs",
+   "id": 137,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Transaction resource manager failed to start",
+   "what": "The NTFS transaction (TxF) metadata on a volume is corrupted.",
+   "causes": [
+    "Unclean shutdown"
+   ],
+   "fix": [
+    "Usually fixed by: fsutil resource setautoreset true C:\\ and a restart"
+   ]
+  },
+  {
+   "provider": "volmgr",
+   "id": 46,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Crash dump initialization failed",
+   "what": "Windows could not prepare to save a memory dump if it crashes, so a future blue screen may leave no dump.",
+   "causes": [
+    "No or too small page file on the system drive",
+    "Storage driver issue"
+   ],
+   "fix": [
+    "Make sure C: has a system-managed page file",
+    "Check System > Advanced > Startup and Recovery settings"
+   ]
+  },
+  {
+   "provider": "volmgr",
+   "id": 49,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Page file for crash dump could not be configured",
+   "what": "The page file is too small or missing, so crash dumps cannot be written.",
+   "causes": [
+    "Page file disabled or too small"
+   ],
+   "fix": [
+    "Set the page file to System managed on C:"
+   ]
+  },
+  {
+   "provider": "volmgr",
+   "id": 161,
+   "class": "attention",
+   "category": "Storage",
+   "title": "Crash dump could not be created",
+   "what": "A blue screen happened but the memory dump could not be written.",
+   "causes": [
+    "Page file too small",
+    "Disk problem during the crash"
+   ],
+   "fix": [
+    "Set the page file to System managed",
+    "Check disk health"
+   ]
+  },
+  {
+   "provider": "volsnap",
+   "id": 25,
+   "class": "attention",
+   "category": "Backup",
+   "title": "Shadow copies deleted (no space to grow)",
+   "what": "Shadow copies (restore points / backup snapshots) were deleted because their storage area could not grow.",
+   "causes": [
+    "Not enough free space",
+    "Shadow storage limit too small",
+    "Very heavy disk writes during backup"
+   ],
+   "fix": [
+    "Free disk space",
+    "Increase shadow storage: vssadmin resize shadowstorage"
+   ],
+   "related": [
+    36
+   ]
+  },
+  {
+   "provider": "volsnap",
+   "id": 33,
+   "class": "harmless",
+   "category": "Backup",
+   "title": "Oldest shadow copy deleted to stay within limit",
+   "what": "The oldest shadow copy was removed to keep shadow storage under its size limit. Normal rotation.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "volsnap",
+   "id": 36,
+   "class": "attention",
+   "category": "Backup",
+   "title": "Shadow copies aborted (storage could not grow)",
+   "what": "Shadow copies were aborted because the shadow storage area could not grow. Backups relying on VSS may fail.",
+   "causes": [
+    "Low disk space",
+    "Shadow storage limit reached"
+   ],
+   "fix": [
+    "Free space or increase shadow storage (vssadmin resize shadowstorage)"
+   ]
+  },
+  {
+   "provider": "VSS",
+   "id": 8193,
+   "class": "attention",
+   "category": "Backup",
+   "title": "Volume Shadow Copy error",
+   "what": "VSS hit an unexpected error calling a routine. Backups and restore points may fail.",
+   "causes": [
+    "Permissions on VSS-related registry keys",
+    "Broken VSS writer from third-party software",
+    "Low disk space"
+   ],
+   "fix": [
+    "Run: vssadmin list writers (look for writers in a failed state)",
+    "Restart the affected service or reboot",
+    "Check the error code in the message"
+   ],
+   "related": [
+    8194,
+    12289
+   ]
+  },
+  {
+   "provider": "VSS",
+   "id": 8194,
+   "class": "attention",
+   "category": "Backup",
+   "title": "VSS writer callback access denied",
+   "what": "VSS could not query a writer callback, usually a permissions problem. Common with some backup products.",
+   "causes": [
+    "Network Service lacks COM access permissions",
+    "Backup software misconfiguration"
+   ],
+   "fix": [
+    "Often harmless if backups succeed; otherwise grant Network Service COM access (dcomcnfg) per your backup vendor's guidance"
+   ]
+  },
+  {
+   "provider": "VSS",
+   "id": 12289,
+   "class": "attention",
+   "category": "Backup",
+   "title": "VSS device I/O error",
+   "what": "VSS got an error talking to a volume. Snapshots of that volume may fail.",
+   "causes": [
+    "Removed or offline volume",
+    "Disk problems",
+    "Hidden recovery partitions"
+   ],
+   "fix": [
+    "Check the volume named in the message and disk health"
+   ]
+  },
+  {
+   "provider": "VSS",
+   "id": 12293,
+   "class": "attention",
+   "category": "Backup",
+   "title": "VSS provider error",
+   "what": "A shadow copy provider returned an error.",
+   "causes": [
+    "Third-party VSS provider",
+    "Low space"
+   ],
+   "fix": [
+    "Run vssadmin list providers; update or remove faulty providers"
+   ]
+  },
+  {
+   "provider": "VSS",
+   "id": 8224,
+   "class": "harmless",
+   "category": "Backup",
+   "title": "VSS service shutting down (idle)",
+   "what": "The Volume Shadow Copy service stopped because it was idle. Normal.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "VSS",
+   "id": 13,
+   "class": "attention",
+   "category": "Backup",
+   "title": "VSS could not start a COM server",
+   "what": "The Volume Shadow Copy service could not start a COM component.",
+   "causes": [
+    "COM+ or service configuration problem"
+   ],
+   "fix": [
+    "Check that 'COM+ System Application' and 'Volume Shadow Copy' services are not disabled"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Chkdsk",
+   "ids": [
+    26212,
+    26214
+   ],
+   "class": "info",
+   "category": "Storage",
+   "title": "Check Disk result",
+   "what": "Result of a chkdsk scan. The message says whether problems were found and fixed.",
+   "causes": [],
+   "fix": [
+    "If problems were found, check disk health"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Defrag",
+   "id": 258,
+   "class": "harmless",
+   "category": "Storage",
+   "title": "Drive optimization completed",
+   "what": "Windows optimized (defragmented or trimmed) a drive. Normal maintenance.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Defrag",
+   "id": 257,
+   "class": "harmless",
+   "category": "Storage",
+   "title": "Drive optimization could not run",
+   "what": "Optimization was skipped for a volume (often not supported, e.g. some USB or virtual drives). Usually harmless.",
+   "causes": [],
+   "fix": []
+  }
+ ]
+}

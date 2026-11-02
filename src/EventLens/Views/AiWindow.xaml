@@ -3,7 +3,7 @@
                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
                  Title="Ask AI"
-                 Width="760" Height="720" MinWidth="520" MinHeight="420"
+                 Width="780" Height="740" MinWidth="520" MinHeight="420"
                  WindowStartupLocation="CenterOwner"
                  ExtendsContentIntoTitleBar="True"
                  WindowBackdropType="Mica"
@@ -20,13 +20,21 @@
 
         <!-- header -->
         <StackPanel Grid.Row="1" Margin="24,4,24,10">
-            <StackPanel Orientation="Horizontal">
-                <ui:SymbolIcon Symbol="Sparkle24" FontSize="22" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
-                <TextBlock x:Name="HeaderText" Margin="10,0,0,0" FontSize="20" FontWeight="SemiBold"
-                           FontFamily="Segoe UI Variable Display, Segoe UI" VerticalAlignment="Center" />
-            </StackPanel>
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <ui:SymbolIcon Symbol="Sparkle24" FontSize="22" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                    <TextBlock x:Name="HeaderText" Margin="10,0,0,0" FontSize="20" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxWidth="520"
+                               FontFamily="Segoe UI Variable Display, Segoe UI" VerticalAlignment="Center" />
+                </StackPanel>
+                <ui:Button x:Name="DeepButton" HorizontalAlignment="Right" Content="Deep analysis" Click="OnDeep" Visibility="Collapsed"
+                           ToolTip="Also send the errors and warnings from ±10 minutes around this event (more tokens)">
+                    <ui:Button.Icon>
+                        <ui:SymbolIcon Symbol="BrainCircuit24" />
+                    </ui:Button.Icon>
+                </ui:Button>
+            </Grid>
             <TextBlock x:Name="ProviderText" FontSize="12" Margin="32,2,0,0" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-            <Expander Header="What is sent to the AI" Margin="0,10,0,0">
+            <Expander x:Name="ContextExpander" Header="What is sent to the AI" Margin="0,10,0,0">
                 <TextBox x:Name="ContextBox" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="180"
                          VerticalScrollBarVisibility="Auto" FontFamily="Cascadia Mono, Consolas" FontSize="11" />
             </Expander>
@@ -37,9 +45,9 @@
                 Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" VerticalAlignment="Top">
             <StackPanel>
-                <TextBlock Text="Connect an AI account first" FontSize="18" FontWeight="SemiBold" />
+                <TextBlock Text="Connect an AI service first" FontSize="18" FontWeight="SemiBold" />
                 <TextBlock TextWrapping="Wrap" Margin="0,6,0,14" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                           Text="EventLens works with your own key. Groq is free (console.groq.com → API Keys); Ollama runs locally with no key. Your key is stored encrypted on this PC only." />
+                           Text="EventLens works with your own key. Groq and Google Gemini have free keys; Ollama runs locally with no key. Your key is stored encrypted on this PC only. Only the text shown under 'What is sent to the AI' leaves your computer." />
                 <ui:Button Content="Open AI settings" Appearance="Primary" Click="OnOpenSettings">
                     <ui:Button.Icon>
                         <ui:SymbolIcon Symbol="Settings24" />
@@ -66,7 +74,7 @@
                     <ui:SymbolIcon Symbol="Send24" />
                 </ui:Button.Icon>
             </ui:Button>
-            <ui:Button Grid.Column="2" Margin="8,0,0,0" Click="OnCopyAll" ToolTip="Copy conversation">
+            <ui:Button Grid.Column="2" Margin="8,0,0,0" Click="OnCopyAll" ToolTip="Copy the whole conversation">
                 <ui:Button.Icon>
                     <ui:SymbolIcon Symbol="Copy24" />
                 </ui:Button.Icon>

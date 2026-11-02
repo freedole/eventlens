@@ -71,7 +71,7 @@
                                 <ui:SymbolIcon Symbol="Sparkle24" />
                             </ui:Button.Icon>
                         </ui:Button>
-                        <ui:Button Content="Events around it" HorizontalAlignment="Stretch"
+                        <ui:Button Content="Timeline around it" HorizontalAlignment="Stretch"
                                    Command="{Binding DataContext.OpenEventsCommand, ElementName=Root}" CommandParameter="{Binding}">
                             <ui:Button.Icon>
                                 <ui:SymbolIcon Symbol="List24" />
@@ -125,7 +125,7 @@
                                             <ui:SymbolIcon Symbol="Sparkle24" />
                                         </ui:Button.Icon>
                                     </ui:Button>
-                                    <ui:Button Appearance="Transparent" ToolTip="Events around this restart"
+                                    <ui:Button Appearance="Transparent" ToolTip="Everything that happened around this restart"
                                                Command="{Binding DataContext.OpenEventsCommand, ElementName=Root}" CommandParameter="{Binding}">
                                         <ui:Button.Icon>
                                             <ui:SymbolIcon Symbol="ChevronRight24" />

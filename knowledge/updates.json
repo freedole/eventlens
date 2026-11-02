@@ -1,0 +1,153 @@
+{
+ "entries": [
+  {
+   "provider": "Microsoft-Windows-WindowsUpdateClient",
+   "id": 19,
+   "class": "info",
+   "category": "Update",
+   "title": "Update installed",
+   "what": "An update was installed successfully.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-WindowsUpdateClient",
+   "id": 20,
+   "class": "attention",
+   "category": "Update",
+   "title": "Update failed to install",
+   "what": "An update could not be installed. The error code is decoded below.",
+   "causes": [
+    "Damaged update cache or component store",
+    "Not enough disk space",
+    "Security software interfering",
+    "Recovery partition too small (some updates)"
+   ],
+   "fix": [
+    "Run the Windows Update troubleshooter",
+    "DISM /Online /Cleanup-Image /RestoreHealth, then sfc /scannow",
+    "Free disk space (at least 10-20 GB on C:)",
+    "Reset Windows Update components (stop wuauserv/bits, rename SoftwareDistribution)",
+    "Install the update manually from the Microsoft Update Catalog"
+   ],
+   "related": [
+    19,
+    43
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-WindowsUpdateClient",
+   "id": 21,
+   "class": "info",
+   "category": "Update",
+   "title": "Restart required to finish updates",
+   "what": "Updates were installed and need a restart to complete.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-WindowsUpdateClient",
+   "id": 43,
+   "class": "harmless",
+   "category": "Update",
+   "title": "Update installation started",
+   "what": "Installation of an update started.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-WindowsUpdateClient",
+   "id": 44,
+   "class": "harmless",
+   "category": "Update",
+   "title": "Update download started",
+   "what": "Windows Update started downloading an update.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Servicing",
+   "id": 2,
+   "class": "info",
+   "category": "Update",
+   "title": "Package installed",
+   "what": "A Windows package (update or feature) was installed successfully.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Servicing",
+   "id": 4,
+   "class": "info",
+   "category": "Update",
+   "title": "Restart needed for package",
+   "what": "A restart is needed before a Windows package can finish installing.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Security-SPP",
+   "id": 8198,
+   "class": "attention",
+   "category": "License",
+   "title": "Windows activation failed",
+   "what": "License activation failed. The error code is decoded below.",
+   "causes": [
+    "No internet",
+    "KMS server unreachable (organizations)",
+    "Invalid or blocked product key"
+   ],
+   "fix": [
+    "Check activation in Settings > System > Activation",
+    "Organizations: check the KMS host (slmgr /dlv)"
+   ]
+  },
+  {
+   "provider": "Microsoft-Windows-Security-SPP",
+   "id": 16384,
+   "class": "harmless",
+   "category": "License",
+   "title": "Software Protection restart scheduled",
+   "what": "The Software Protection service scheduled its next restart. Routine and harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Security-SPP",
+   "id": 16385,
+   "class": "harmless",
+   "category": "License",
+   "title": "Software Protection restart could not be scheduled",
+   "what": "Software Protection could not schedule its restart task. Very common and normally harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Security-SPP",
+   "id": 16394,
+   "class": "harmless",
+   "category": "License",
+   "title": "Offline license migration succeeded",
+   "what": "Routine Software Protection record. Harmless.",
+   "causes": [],
+   "fix": []
+  },
+  {
+   "provider": "Microsoft-Windows-Security-SPP",
+   "ids": [
+    1003,
+    1033,
+    1066,
+    900,
+    902,
+    903
+   ],
+   "class": "harmless",
+   "category": "License",
+   "title": "Software Protection service status",
+   "what": "Routine Software Protection (licensing) status record. Harmless.",
+   "causes": [],
+   "fix": []
+  }
+ ]
+}

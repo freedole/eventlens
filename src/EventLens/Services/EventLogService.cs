@@ -1,5 +1,6 @@
 using System.Diagnostics.Eventing.Reader;
 using System.Globalization;
+using EventLens.Core.Knowledge;
 using EventLens.Models;
 
 namespace EventLens.Services;
@@ -119,18 +120,17 @@ public static class EventLogService
     {
         var provider = rec.ProviderName ?? "";
         string message = "";
-        IReadOnlyList<string> data = [];
+        var data = ReadData(rec);   // cheap; needed for templates, rules and harmless classification
 
         if (full)
         {
             try { message = rec.FormatDescription() ?? ""; }
             catch { /* provider metadata missing */ }
-            data = ReadData(rec);
             if (string.IsNullOrEmpty(message))
                 message = string.Join(Environment.NewLine, data);
         }
 
-        return new EventItem
+        var item = new EventItem
         {
             TimeCreated = rec.TimeCreated ?? DateTime.MinValue,
             Id = rec.Id,
@@ -142,8 +142,10 @@ public static class EventLogService
             UserId = rec.UserId?.Value,
             RecordId = rec.RecordId,
             Data = data,
-            Explanation = EventKnowledge.Lookup(provider, rec.Id),
+            Explanation = KnowledgeBase.Explain(provider, rec.Id, data, message),
         };
+        item.UserMuted = AppState.IsMuted(item.TypeKey);
+        return item;
     }
 
     private static IReadOnlyList<string> ReadData(EventRecord rec)
@@ -164,11 +166,44 @@ public static class EventLogService
         _ => Severity.Information,
     };
 
-    /// <summary>Quick connectivity/permission check for a source.</summary>
-    public static Task TestAsync(EventSource source) => Task.Run(() =>
+    /// <summary>Quick connectivity/permission check for a source, with a timeout (remote RPC can hang).</summary>
+    public static async Task TestAsync(EventSource source, int timeoutSeconds = 20)
     {
-        var q = source.CreateQuery("System", "*");
-        using var reader = new EventLogReader(q);
-        using var rec = reader.ReadEvent();
+        var work = Task.Run(() =>
+        {
+            var q = source.CreateQuery("System", "*");
+            using var reader = new EventLogReader(q);
+            using var rec = reader.ReadEvent();
+        });
+        if (await Task.WhenAny(work, Task.Delay(TimeSpan.FromSeconds(timeoutSeconds))) != work)
+            throw new TimeoutException($"No answer from {source.Computer} within {timeoutSeconds} seconds.");
+        await work;
+    }
+
+    /// <summary>Exports matching events of one log (or the opened file) to an .evtx file, with messages.</summary>
+    public static Task ExportEvtxAsync(string log, string xpath, string targetPath) => Task.Run(() =>
+    {
+        var src = AppState.Source;
+        using var session = src.CreateSession();
+        if (src.Kind == SourceKind.File)
+            session.ExportLogAndMessages(src.FilePath!, PathType.FilePath, xpath, targetPath);
+        else
+            session.ExportLogAndMessages(log, PathType.LogName, xpath, targetPath);
     });
+
+    /// <summary>Lists event log channels that exist and contain events (for the Timeline).</summary>
+    public static IReadOnlyList<string> TimelineChannels { get; } =
+    [
+        "System", "Application", "Security", "Setup",
+        "Microsoft-Windows-Windows Defender/Operational",
+        "Microsoft-Windows-WindowsUpdateClient/Operational",
+        "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational",
+        "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational",
+        "Microsoft-Windows-Diagnostics-Performance/Operational",
+        "Microsoft-Windows-WLAN-AutoConfig/Operational",
+        "Microsoft-Windows-Kernel-PnP/Configuration",
+        "Microsoft-Windows-TaskScheduler/Operational",
+        "Microsoft-Windows-Time-Service/Operational",
+        "Microsoft-Windows-GroupPolicy/Operational",
+    ];
 }

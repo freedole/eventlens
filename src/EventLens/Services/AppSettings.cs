@@ -14,6 +14,21 @@ public sealed class AppSettings
     public int LevelIndex { get; set; } = 2;
     public int WindowIndex { get; set; } = 1;
     public List<string> RecentComputers { get; set; } = [];
+    public bool HideHarmless { get; set; } = true;
+    public List<double> EventColumnWidths { get; set; } = [];
+
+    public bool KbAutoUpdate { get; set; } = true;
+    public DateTime KbLastCheck { get; set; }
+    public bool CheckForUpdates { get; set; } = true;
+    public bool IncludePrereleases { get; set; } = true;
+    public DateTime UpdateLastCheck { get; set; }
+    public string SkippedVersion { get; set; } = "";
+
+    public double? WindowLeft { get; set; }
+    public double? WindowTop { get; set; }
+    public double WindowWidth { get; set; }
+    public double WindowHeight { get; set; }
+    public bool WindowMaximized { get; set; }
 
     public string AiProvider { get; set; } = "Groq";
     public string AiEndpoint { get; set; } = "";
